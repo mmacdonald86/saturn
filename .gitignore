@@ -3,3 +3,4 @@ docker/saturn/version
 docker/saturn/Dockerfile
 **/*.o
 **/*.so
+.vscode/
