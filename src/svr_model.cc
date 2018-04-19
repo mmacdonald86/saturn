@@ -50,7 +50,7 @@ namespace saturn
         delete static_cast<mars::CatalogModel *>(_mars_model);
     }
 
-    Status SvrModel::run(std::string const & brand_name, double user_brand_svr)
+    int SvrModel::run(std::string const & brand_id, double user_brand_svr)
     {
         try {
             _feature_engine.update_field(FeatureEngine::FloatField::kUserExtlba, user_brand_svr);
@@ -59,18 +59,18 @@ namespace saturn
             auto x = f->render(_composer_id);
 
             auto m = static_cast<mars::CatalogModel *>(_mars_model);
-            auto z = m->run(x, brand_name);
+            auto z = m->run(x, brand_id);
 
             auto zz = std::any_cast<mars::ChainModel::result_type>(z);
             _bid_multiplier = std::any_cast<double>(std::get<0>(zz));
             _svr = std::get<1>(zz)[0][0];
             _message = "";
-            return Status::ok;
+            return 0;
         } catch (std::exception& e) {
             _bid_multiplier = 0.;
             _svr = 0.;
             _message = e.what();
-            return Status::error;
+            return 2;
         }
     }
 

@@ -23,12 +23,5 @@ class SaturnError : public std::runtime_error {
     }
 };
 
-enum class Status {
-    ok = 0,
-    warning = 10,
-    error = 20,
-};
-
-
 }  // namespace
 #endif  // include guard

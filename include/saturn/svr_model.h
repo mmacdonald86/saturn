@@ -70,9 +70,11 @@ namespace saturn
 
             std::string const & model_id() const;
 
-            Status run(std::string const & brand_name, double user_brand_svr);
-
-            // The following methods provide results following a call to `run`.
+            int run(std::string const & brand_id, double user_brand_svr);
+            // 0 is success; usually no need to check `message()`.
+            // Other values indicate problems; check `message()`.
+            
+            // The following methods provide results after a call to `run`.
             double svr() const;
             double bid_multiplier() const;
             std::string const & message() const;
