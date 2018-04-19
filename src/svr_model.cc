@@ -1,5 +1,6 @@
 #include "saturn/common.h"
 #include "saturn/svr_model.h"
+#include "saturn/feature_engine.h"
 #include "mars/catalog_model.h"
 #include "mars/single_model.h"
 #include "mars/featurizer.h"
@@ -12,6 +13,7 @@
 namespace saturn
 {
     SvrModel::SvrModel(FeatureEngine & feature_engine, std::string path)
+        : _feature_engine(feature_engine)
     {
         // Removing trailing '/'.
         while (path.back() == '/') {
@@ -21,7 +23,6 @@ namespace saturn
             throw SaturnError("can not use root directory as `path` for model data");
         }
         
-        _feature_engine = feature_engine;
         _path = path;
         _model_id = path;  // TODO: improve this later, adding more info
 

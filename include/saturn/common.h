@@ -1,7 +1,7 @@
 #ifndef _SATURN_COMMON_H_
 #define _SATURN_COMMON_H_
 
-#include <exception>
+#include <stdexcept>
 #include <string>
 #include <vector>
 

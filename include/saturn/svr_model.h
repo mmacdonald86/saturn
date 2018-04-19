@@ -84,7 +84,7 @@ namespace saturn
             std::string _path;
             std::string _model_id;
             std::string _composer_id;
-            
+
             double _svr = 0.;
             double _bid_multiplier = 0.;
             std::string _message = "";

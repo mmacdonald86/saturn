@@ -7,7 +7,7 @@
 
 namespace saturn {
 
-FeatureEngine::FeatureEngine(std::string root_path)
+FeatureEngine::FeatureEngine()
 {
     std::vector<std::string> columns;
     columns.insert(columns.end(), STRING_FIELDS.cbegin(), STRING_FIELDS.cend());
@@ -18,7 +18,7 @@ FeatureEngine::FeatureEngine(std::string root_path)
         throw SaturnError("field names for `FeatureEngine` are not all unique");
     }
 
-    _mars_feature_engine = static_cast<void *>(new mars::FeatureEngine>(columns));
+    _mars_feature_engine = static_cast<void *>(new mars::FeatureEngine(columns));
 }
 
 
