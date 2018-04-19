@@ -7,7 +7,6 @@
 #include "mars/utils.h"
 
 #include <any>
-#include <exception>
 #include <tuple>
 
 namespace saturn

@@ -4,3 +4,4 @@ docker/saturn/Dockerfile
 **/*.o
 **/*.so
 .vscode/
+benchmarks/svr/do_svr

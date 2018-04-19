@@ -2,8 +2,6 @@
 #include "mars/featurizer.h"
 
 #include <set>
-#include <string>
-#include <vector>
 
 namespace saturn {
 

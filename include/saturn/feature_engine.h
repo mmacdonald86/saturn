@@ -42,7 +42,7 @@ class FeatureEngine
             "os",
         };
 
-        enum class StringField : unsigned int
+        enum class StringField : size_t
         {
             kGender = 0,
             kCarrier,
@@ -62,7 +62,7 @@ class FeatureEngine
             "device_year",
         };
 
-        enum class IntField : unsigned int
+        enum class IntField : size_t
         {
             kPubId = 0,
             kAge,
@@ -77,7 +77,7 @@ class FeatureEngine
             "user_extlba",
         };
 
-        enum class FloatField : unsigned int
+        enum class FloatField : size_t
         {
             kLat = 0,
             kLon,

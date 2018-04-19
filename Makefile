@@ -13,7 +13,7 @@ TARGETS = libsaturn.so
 
 all: $(TARGETS)
 
-libsaturn.so: src/feature_engine.cc src/svr_model.cc
+libsaturn.so: src/feature_engine.cc src/svr_model.cc src/utils.cc
 	$(CC) $(CCFLAGS) -std=c++17 $(INCLUDES) -fPIC -shared $^ $(LIBS) -o $@
 
 clean:
