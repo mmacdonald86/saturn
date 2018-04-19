@@ -30,17 +30,7 @@ class FeatureEngine
 
         // A 'field' here is a 'column' in Mars terminology.
 
-        const std::vector<std::string> STRING_FIELDS = {
-            "gender",
-            "carrier",
-            "device_type",
-            "device_make",
-            "device_model",
-            "hour",
-            "state",
-            "zipcode",
-            "os",
-        };
+        static const std::vector<std::string> STRING_FIELDS;
 
         enum class StringField : size_t
         {
@@ -55,12 +45,7 @@ class FeatureEngine
             kOs,
         };
 
-        const std::vector<std::string> INT_FIELDS = {
-            "pub_id",
-            "age",
-            "sl_adjusted_confidence",
-            "device_year",
-        };
+        static const std::vector<std::string> INT_FIELDS;
 
         enum class IntField : size_t
         {
@@ -70,12 +55,7 @@ class FeatureEngine
             kDeviceYear,
         };
 
-        const std::vector<std::string> FLOAT_FIELDS = {
-            "latitude",
-            "longitude",
-            "pub_bid_floor",
-            "user_extlba",
-        };
+        static const std::vector<std::string> FLOAT_FIELDS;
 
         enum class FloatField : size_t
         {

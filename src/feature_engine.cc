@@ -5,6 +5,36 @@
 
 namespace saturn {
 
+
+const std::vector<std::string> FeatureEngine::STRING_FIELDS({
+    "gender",
+    "carrier",
+    "device_type",
+    "device_make",
+    "device_model",
+    "hour",
+    "state",
+    "zipcode",
+    "os",
+});
+
+
+const std::vector<std::string> FeatureEngine::INT_FIELDS({
+    "pub_id",
+    "age",
+    "sl_adjusted_confidence",
+    "device_year",
+});
+
+
+const std::vector<std::string> FeatureEngine::FLOAT_FIELDS({
+    "latitude",
+    "longitude",
+    "pub_bid_floor",
+    "user_extlba",
+});
+
+
 FeatureEngine::FeatureEngine()
 {
     std::vector<std::string> columns;

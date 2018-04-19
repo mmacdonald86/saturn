@@ -5,13 +5,9 @@
 #include <cassert>
 #include <fstream>
 #include <iostream>
-// #include <memory>
 #include <stdexcept>
 #include <string>
-// #include <sstream>
 #include <vector>
-// #include <tuple>
-// #include <utility>  // as_const
 
 using namespace saturn;
 
@@ -31,31 +27,34 @@ struct ColumnValue {
 };
 
 
-size_t find_column_idx(FeatureEngine const & feature_engine, std::string const & name, std::string const & type)
+size_t find_column_idx(std::string const & name, std::string const & type)
 {
     if ("str" == type) {
-        auto it = std::find(feature_engine.STRING_FIELDS.cbegin(), feature_engine.STRING_FIELDS.cend(), name);
-        return static_cast<size_t>(std::distance(feature_engine.STRING_FIELDS.cbegin(), it));
+        auto const & fields = FeatureEngine::STRING_FIELDS;
+        auto it = std::find(fields.cbegin(), fields.cend(), name);
+        return static_cast<size_t>(std::distance(fields.cbegin(), it));
     }
     if ("int" == type) {
-        auto it = std::find(feature_engine.INT_FIELDS.cbegin(), feature_engine.INT_FIELDS.cend(), name);
-        return static_cast<size_t>(std::distance(feature_engine.INT_FIELDS.cbegin(), it));
+        auto const & fields = FeatureEngine::INT_FIELDS;
+        auto it = std::find(fields.cbegin(), fields.cend(), name);
+        return static_cast<size_t>(std::distance(fields.cbegin(), it));
     }
     if ("float" == type) {
-        auto it = std::find(feature_engine.FLOAT_FIELDS.cbegin(), feature_engine.FLOAT_FIELDS.cend(), name);
-        return static_cast<size_t>(std::distance(feature_engine.FLOAT_FIELDS.cbegin(), it));
+        auto const & fields = FeatureEngine::FLOAT_FIELDS;
+        auto it = std::find(fields.cbegin(), fields.cend(), name);
+        return static_cast<size_t>(std::distance(fields.cbegin(), it));
     }
     throw std::runtime_error(std::string("unrecognized type '" + type + "'"));
 }
 
 
-std::vector<ColumnInfo> read_column_list(std::string const & filename, FeatureEngine const & feature_engine)
+std::vector<ColumnInfo> read_column_list(std::string const & filename)
 {
     std::vector<ColumnInfo> columns;
     auto infile = std::ifstream(filename);
     std::string col_name, col_type;
     while (infile >> col_name >> col_type) {
-        columns.emplace_back(col_type[0], find_column_idx(feature_engine, col_name, col_type));
+        columns.emplace_back(col_type[0], find_column_idx(col_name, col_type));
     }
     infile.close();
     return columns;
@@ -198,7 +197,7 @@ int main(int argc, char const * const * argv) {
     auto feature_engine = saturn::FeatureEngine();
     auto svr_model = saturn::SvrModel(feature_engine, modelpath);
 
-    auto col_info = read_column_list(modelpath + "/data_test/column_list.txt", feature_engine);
+    auto col_info = read_column_list(modelpath + "/data_test/column_list.txt");
     auto request_data = read_request_data(modelpath + "/data_test/raw.txt", col_info);
     auto brand_ids = read_brand_list(modelpath + "/data_test/brand_ids.txt");
 
