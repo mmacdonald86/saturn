@@ -2,10 +2,39 @@
 #include "mars/featurizer.h"
 
 #include <set>
-#include <string>
-#include <vector>
 
-namespace saturn {
+namespace saturn
+{
+
+
+const std::vector<std::string> FeatureEngine::STRING_FIELDS({
+    "gender",
+    "carrier",
+    "device_type",
+    "device_make",
+    "device_model",
+    "hour",
+    "state",
+    "zipcode",
+    "os",
+});
+
+
+const std::vector<std::string> FeatureEngine::INT_FIELDS({
+    "pub_id",
+    "age",
+    "sl_adjusted_confidence",
+    "device_year",
+});
+
+
+const std::vector<std::string> FeatureEngine::FLOAT_FIELDS({
+    "latitude",
+    "longitude",
+    "pub_bid_floor",
+    "user_extlba",
+});
+
 
 FeatureEngine::FeatureEngine()
 {
@@ -41,19 +70,19 @@ void FeatureEngine::update_field(StringField idx, std::string const * value)
 void FeatureEngine::update_field(StringField idx, char const * c_str)
 {
     auto f = static_cast<mars::FeatureEngine *>(_mars_feature_engine);
-    f->ingest_column(_string_field_idx_base + static_cast<size_t>(idx), mars::Column(c_str));    
+    f->ingest_column(_string_field_idx_base + static_cast<size_t>(idx), mars::Column(c_str));
 }
 
 void FeatureEngine::update_field(IntField idx, int value)
 {
     auto f = static_cast<mars::FeatureEngine *>(_mars_feature_engine);
-    f->ingest_column(_int_field_idx_base + static_cast<size_t>(idx), mars::Column(value));    
+    f->ingest_column(_int_field_idx_base + static_cast<size_t>(idx), mars::Column(value));
 }
 
 void FeatureEngine::update_field(FloatField idx, double value)
 {
     auto f = static_cast<mars::FeatureEngine *>(_mars_feature_engine);
-    f->ingest_column(_float_field_idx_base + static_cast<size_t>(idx), mars::Column(value));    
+    f->ingest_column(_float_field_idx_base + static_cast<size_t>(idx), mars::Column(value));
 }
 
 void FeatureEngine::reset_fields()

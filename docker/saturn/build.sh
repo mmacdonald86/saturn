@@ -1,7 +1,6 @@
 read -r -d '' USAGE <<'EOF'
 Usage:
-    bash build.sh master|nightly [push [clean]]
-    bash build.sh dev [clean]
+    bash build.sh mars-master|mars-nightly
 EOF
 
 
@@ -17,50 +16,26 @@ if [[ $# < 1 ]]; then
 fi
 
 task="$1"
-if [[ "${task}" == "master" ]] || [[ "${task}" == "nightly" ]]; then
-    echo
-    read -p 'Your github username: ' username
-    read -sp 'Your github password: ' passwd
-    echo
-    gituser=${username}:${passwd}
+echo
+read -p 'Your github username: ' username
+read -sp 'Your github password: ' passwd
+echo
+gituser=${username}:${passwd}
 
-    if [[ "${task}" == "master" ]]; then
-        SATURN_VERSION=$(cat "$(curl --user ${gituser} -s https://raw.githubusercontent.com/xadrnd/saturn/master/include/saturn/version)")
-        SATURN_URL=https://github.com/xadrnd/saturn/archive/v${SATURN_VERSION}.tar.gz
-        curl --user ${gituser} -skL --retry 3 ${MARS_URL} -o saturn.tar.gz
-        name=saturn
-        version=${SATURN_VERSION}
-    else
-        SATURN_URL=https://github.com/xadrnd/saturn/archive/develop.zip
-        curl --user ${username}:${passwd} -skL --retry 3 ${SATURN_URL} -o saturn.zip
-        name=saturn-nightly
-        version=$(date +%Y%m%d)
-    fi
-
-    if [[ $# > 1 ]]; then
-        push="$2"
-        if [[ $# > 2 ]]; then
-            clean="$3"
-        else
-            clean=""
-        fi
-    else
-        push=""
-        clean=""
-    fi
-else
-    if [[ "${task}" != "dev" ]]; then
-        echo "${USAGE}"
-        exit 1
-    fi
+if [[ "${task}" == "mars-master" ]]; then
+    MARS_VERSION=$(python -c "$(curl --user ${gituser} -s https://raw.githubusercontent.com/xadrnd/mars/master/mars/version.py); print(full)")
+    MARS_URL=https://github.com/xadrnd/mars/archive/v${MARS_VERSION}.tar.gz
+    curl --user ${gituser} -skL --retry 3 ${MARS_URL} -o mars.tar.gz
+    name=saturn-master
+elif [[ "${task}" == "mars-nightly" ]]; then
+    MARS_URL=https://github.com/xadrnd/mars/archive/develop.zip
+    curl --user ${gituser} -skL --retry 3 ${MARS_URL} -o mars.zip
     name=saturn-dev
-    version="$(date +%Y%m%d)"
-    if [[ $# > 1 ]]; then
-        clean="$2"
-    else
-        clean=""
-    fi
+else
+    echo "${USAGE}"
+    exit 1
 fi
+version="$(date +%Y%m%d)"
 
 
 echo "${name}" > "${thisdir}"/name
@@ -82,27 +57,27 @@ USER root
 
 EOF
 
-cat >> "${thisdir}"/Dockerfile <<'EOF'
+if [[ "${task}" == "mars-master" ]]; then
+    cat >> "${thisdir}/Dockerfile" <<EOF
+COPY mars.tar.gz /tmp/
+RUN cd /tmp \\
+    && tar -xzf mars.tar.gz \\
+    && mv mars-${MARS_VERSION} mars
 
 EOF
+else
+    cat >> "${thisdir}/Dockerfile" <<EOF
+COPY mars.zip /tmp/
+RUN cd /tmp \\
+    && unzip mars.zip \\
+    && mv mars-develop mars
 
-if [[ "${name}" == "saturn" ]]; then
-    cat >> "${thisdir}/Dockerfile" <<EOF
-    COPY saturn.tar.gz /tmp/
-    RUN cd /tmp \
-        && tar -xzf saturn.tar.gz \\
-        && mv saturn-${SATURN_VERSION} saturn-code
-EOF
-elif [[ "${name}" == "saturn-nightly" ]]; then
-    cat >> "${thisdir}/Dockerfile" <<EOF
-    COPY saturn.zip /tmp/
-    RUN cd /tmp \
-        && unzip saturn.zip \\
-        && mv saturn-develop saturn-code
 EOF
 fi
 
 cat >> "${thisdir}"/Dockerfile <<'EOF'
+ARG ASTYLE_VERSION=3.1
+ARG ASTYLE_URL=https://sourceforge.net/projects/astyle/files/astyle/astyle%20${ASTYLE_VERSION}/astyle_${ASTYLE_VERSION}_linux.tar.gz/download
 
 ARG RAPIDJSON_VERSION=1.1.0
 ARG RAPIDJSON_URL=https://github.com/Tencent/rapidjson/archive/v${RAPIDJSON_VERSION}.tar.gz
@@ -139,24 +114,17 @@ RUN echo "deb http://ftp.us.debian.org/debian testing main contrib non-free" >> 
         flex \
         bison \
     \
-EOF
-
-if [[ "${name}" == "saturn-dev" ]]; then
-    cat >> "${thisdir}"/Dockerfile <<'EOF'
-    && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/* /tmp/*
-EOF
-else
-    cat >> "${thisdir}"/Dockerfile <<'EOF'
-    && cd /tmp/saturn-code \
-    && cp -r install/saturn /usr/local/include \
+    && curl -skL --retry 3 ${ASTYLE_URL} | tar xz -C /tmp \
+    && cd /tmp/astyle/build/gcc \
+    && make \
+    && mv bin/astyle /usr/local/bin \
     \
-    && apt-get remove --purge -y \
-        gcc-7 g++-7 make cmake \
+    && cp -r /tmp/mars/include/mars /usr/local/include \
+    && cp /tmp/mars/mars/version.py /usr/local/include/mars \
+    \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/* /tmp/*
 EOF
-fi
 
 echo
 echo Building image "'${NAME}'"
@@ -165,33 +133,10 @@ docker build -t "${NAME}" "${thisdir}"
 echo
 
 
-if [[ "${name}" == "saturn" ]] || [[ "${name}" == "saturn-nightly" ]]; then
-    rm -f saturn.tar.gz mars.zip
+python $( dirname "${thisdir}" )/pyinstall.py \
+    --imgname=${name} \
+    --imgversion=${version} \
+    --cmd=${name}
 
-    if [[ "${push}" == "push" ]]; then
-        TAG=${ECR_URL}/mars/${NAME}
-
-        docker tag ${NAME} ${TAG}
-        $(aws ecr get-login --no-include-email --region us-east-1)
-
-        echo Pushing ${TAG} to AWS
-        docker push ${TAG}
-
-        if [[ "${clean}" == "clean" ]]; then
-            rm -f "${thisdir}/name" "${thisdir}/version" "${thisdir}/Dockerfile"
-        fi
-    fi
-else
-    python $( dirname "${thisdir}" )/pyinstall.py \
-        --imgname=${name} \
-        --imgversion=${version} \
-        --cmd=${name}
-
-    # TODO:
-    # `ln -s ~/work/src/mars/include/mars /usr/local/include/mars`
-    # at startup.
-
-    if [[ "${clean}" == "clean" ]]; then
-        rm -f "${thisdir}/name" "${thisdir}/version" "${thisdir}/Dockerfile"
-    fi
-fi
+rm -f mars.tar.gz mars.zip
+rm -f "${thisdir}/name" "${thisdir}/version" "${thisdir}/Dockerfile"
