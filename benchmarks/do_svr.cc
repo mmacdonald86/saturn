@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
@@ -184,14 +185,15 @@ void run(
 
 
 int main(int argc, char const * const * argv) {
+    std::string modelpath;
+
     if (argc < 2) {
-        std::cout << "Usage:" << std::endl;
-        std::cout << "    test_svr path" << std::endl;
-        return 0;
-    }
-    auto modelpath = std::string(argv[1]);
-    while (modelpath.back() == '/') {
-        modelpath.pop_back();
+        modelpath = std::string(std::getenv("DATADIR")) + "/saturn/svr";
+    } else {
+        modelpath = std::string(argv[1]);
+        while (modelpath.back() == '/') {
+            modelpath.pop_back();
+        }
     }
 
     auto feature_engine = saturn::FeatureEngine();
