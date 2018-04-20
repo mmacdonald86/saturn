@@ -1,7 +1,7 @@
 read -r -d '' USAGE <<'EOF'
 Usage:
-    bash build.sh master|nightly [push [clean]]
-    bash build.sh dev [clean]
+    bash build.sh master|nightly [push]
+    bash build.sh dev
 EOF
 
 
@@ -39,14 +39,8 @@ if [[ "${task}" == "master" ]] || [[ "${task}" == "nightly" ]]; then
 
     if [[ $# > 1 ]]; then
         push="$2"
-        if [[ $# > 2 ]]; then
-            clean="$3"
-        else
-            clean=""
-        fi
     else
         push=""
-        clean=""
     fi
 else
     if [[ "${task}" != "dev" ]]; then
@@ -55,11 +49,6 @@ else
     fi
     name=saturn-dev
     version="$(date +%Y%m%d)"
-    if [[ $# > 1 ]]; then
-        clean="$2"
-    else
-        clean=""
-    fi
 fi
 
 
@@ -99,6 +88,11 @@ elif [[ "${name}" == "saturn-nightly" ]]; then
     RUN cd /tmp \
         && unzip saturn.zip \\
         && mv saturn-develop saturn-code
+EOF
+else
+    cat >> "${thisdir}/Dockerfile" <<'EOF'
+    ARG ASTYLE_VERSION=3.1
+    ARG ASTYLE_URL=https://sourceforge.net/projects/astyle/files/astyle/astyle%20${ASTYLE_VERSION}/astyle_${ASTYLE_VERSION}_linux.tar.gz/download
 EOF
 fi
 
@@ -143,6 +137,11 @@ EOF
 
 if [[ "${name}" == "saturn-dev" ]]; then
     cat >> "${thisdir}"/Dockerfile <<'EOF'
+    && curl -skL --retry 3 ${ASTYLE_URL} | tar xz -C /tmp \
+    && cd /tmp/astyle/build/gcc \
+    && make \
+    && mv bin/astyle /usr/local/bin \
+    \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/* /tmp/*
 EOF
@@ -177,9 +176,7 @@ if [[ "${name}" == "saturn" ]] || [[ "${name}" == "saturn-nightly" ]]; then
         echo Pushing ${TAG} to AWS
         docker push ${TAG}
 
-        if [[ "${clean}" == "clean" ]]; then
-            rm -f "${thisdir}/name" "${thisdir}/version" "${thisdir}/Dockerfile"
-        fi
+        rm -f "${thisdir}/name" "${thisdir}/version" "${thisdir}/Dockerfile"
     fi
 else
     python $( dirname "${thisdir}" )/pyinstall.py \
@@ -191,7 +188,5 @@ else
     # `ln -s ~/work/src/mars/include/mars /usr/local/include/mars`
     # at startup.
 
-    if [[ "${clean}" == "clean" ]]; then
-        rm -f "${thisdir}/name" "${thisdir}/version" "${thisdir}/Dockerfile"
-    fi
+    rm -f "${thisdir}/name" "${thisdir}/version" "${thisdir}/Dockerfile"
 fi
