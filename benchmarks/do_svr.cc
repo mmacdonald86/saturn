@@ -129,8 +129,8 @@ void timeit(long n, Timer const & timer)
 
 
 void run(
-    FeatureEngine & feature_engine, 
-    SvrModel & svr_model, 
+    FeatureEngine & feature_engine,
+    SvrModel & svr_model,
     std::vector<ColumnInfo> const & col_info,
     std::vector<std::vector<ColumnValue>> const & request_data,
     std::vector<std::string> const & brand_ids,
@@ -179,12 +179,13 @@ void run(
     std::cout << "processing " << N << " requests:" << std::endl;
     timeit(N, timer);
     std::cout << std::endl << "considering " << n << " brands per request, "
-        << "hence " << N * n << " model calls:" << std::endl;
+              << "hence " << N * n << " model calls:" << std::endl;
     timeit(N * n, timer);
 }
 
 
-int main(int argc, char const * const * argv) {
+int main(int argc, char const * const * argv)
+{
     std::string modelpath;
 
     if (argc < 2) {

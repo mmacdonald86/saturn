@@ -10,7 +10,8 @@ namespace saturn
 
 using size_t = std::size_t;
 
-class SaturnError : public std::runtime_error {
+class SaturnError : public std::runtime_error
+{
   public:
     SaturnError(std::string const& msg)
         : std::runtime_error(msg)

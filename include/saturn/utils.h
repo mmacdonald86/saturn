@@ -5,24 +5,25 @@
 
 namespace saturn
 {
-    class Timer {
-        using clock = std::chrono::high_resolution_clock;
+class Timer
+{
+    using clock = std::chrono::high_resolution_clock;
 
-      public:
-        void start();
+  public:
+    void start();
 
-        void stop();
+    void stop();
 
-        long microseconds() const;
+    long microseconds() const;
 
-        double milliseconds() const;
+    double milliseconds() const;
 
-        double seconds() const;
+    double seconds() const;
 
-      private:
-        bool _running = false;
-        std::chrono::high_resolution_clock::time_point _t_start, _t_stop;
-    };
+  private:
+    bool _running = false;
+    std::chrono::high_resolution_clock::time_point _t_start, _t_stop;
+};
 
 }    // namespace
 #endif  // include guard
