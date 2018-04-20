@@ -23,7 +23,9 @@ echo
 gituser=${username}:${passwd}
 
 if [[ "${task}" == "mars-master" ]]; then
-    MARS_VERSION=$(python -c "$(curl --user ${gituser} -s https://raw.githubusercontent.com/xadrnd/mars/master/mars/version.py); print(full)")
+    #MARS_VERSION=$(python -c "$(curl --user ${gituser} -s https://raw.githubusercontent.com/xadrnd/mars/master/mars/version.py); print(full)")
+    MARS_VERSION=$(tail -n 1 $(dirname $(dirname ${thisdir}))/version)
+    MARS_VERSION=${MARS_VERSION#mars }
     MARS_URL=https://github.com/xadrnd/mars/archive/v${MARS_VERSION}.tar.gz
     curl --user ${gituser} -skL --retry 3 ${MARS_URL} -o mars.tar.gz
     name=saturn-master
