@@ -9,7 +9,7 @@ TARGETS = libsaturn.so do_svr
 all: $(TARGETS)
 
 libsaturn.so: src/feature_engine.cc src/svr_model.cc src/utils.cc
-	$(CC) -std=c++17 $(CCFLAGS) -I../mars/include -Iinclude -fPIC -shared $^ $(LIBS) -o $@
+	$(CC) -std=c++17 $(CCFLAGS) -Iinclude -fPIC -shared $^ $(LIBS) -o $@
 
 do_svr: benchmarks/do_svr.cc
 	$(CC) $(CCFLAGS) -Iinclude $^ ./libsaturn.so $(LIBS) -o do_svr
@@ -17,5 +17,5 @@ do_svr: benchmarks/do_svr.cc
 clean:
 	rm -f *.o
 	rm -f *.so
-	rm -f benchmarks/do_svr
+	rm -f do_svr
 
