@@ -11,10 +11,11 @@ LIBDIR = /home/xad/saturn
 # -fPIC
 
 TARGETS = libsaturn.so
-CURRENT_DIR = ${CURDIR}/..
+CURRENT_DIR = ${CURDIR}
 all: $(TARGETS)
+		sudo mkdir -p $(LIBDIR)
 		sudo rm -f $(LIBDIR)/*
-		sudo ln -s $(CURRENT_DIR)/include/saturn/* $(LIBDIR)/
+		sudo ln -s $(CURRENT_DIR)/../include/saturn/* $(LIBDIR)/
 		sudo ln -s $(CURRENT_DIR)/libsaturn.so $(LIBDIR)/libsaturn.so
 
 libsaturn.so: ../src/feature_engine.cc ../src/svr_model.cc
