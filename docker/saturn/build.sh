@@ -1,7 +1,7 @@
 read -r -d '' USAGE <<'EOF'
 Usage:
     bash build.sh master|nightly [push]
-    bash build.sh dev|develop
+    bash build.sh dev
 EOF
 
 
@@ -32,29 +32,24 @@ gituser=${username}:${passwd}
 # saturn:
 #   stable `master` versions of `mars` and `saturn`
 # saturn-nightly:
-#   stable `master` version of `mars`, `develop` version of `saturn`
+#   `develop` version of `mars`, `develop` version of `saturn`
 # saturn-dev:
-#   stable `master` version of `mars`, local repo of `saturn`
-# saturn-develop:
-#   `develop` branch of `mars`, local repo of `saturn`
+#   `develop` version of `mars`, local repo of `saturn`
 
 rm -f mars.tar.gz mars.zip
 rm -f saturn.tar.gz saturn.zip
 rm -f name version Dockerfile pyinstall.py
-rm -rf mars saturn saturn-version
+rm -rf mars saturn
 
 
 if [[ "${task}" == "master" ]]; then
-    curl --user ${gituser} -s https://raw.githubusercontent.com/xadrnd/saturn/master/version -o saturn-version
-    SATURN_VERSION=$(head -n 1 saturn-version)
-    SATURN_VERSION=${SATURN_VERSION#saturn }
+    SATURN_VERSION=$(curl --user ${gituser} -s https://raw.githubusercontent.com/xadrnd/saturn/master/version)
     SATURN_URL=https://github.com/xadrnd/saturn/archive/v${SATURN_VERSION}.tar.gz
     curl --user ${gituser} -skL --retry 3 ${SATURN_URL} -o saturn.tar.gz
     tar -xzf saturn.tar.gz
     mv saturn-${SATURN_VERSION} saturn
 
-    MARS_VERSION=$(tail -n 1 saturn-version)
-    MARS_VERSION=${MARS_VERSION#mars }
+    MARS_VERSION=$(python -c "$(curl --user ${gituser} -s https://raw.githubusercontent.com/xadrnd/mars/master/mars/version.py); print(full)")
     MARS_URL=https://github.com/xadrnd/mars/archive/v${MARS_VERSION}.tar.gz
     curl --user ${gituser} -skL --retry 3 ${MARS_URL} -o mars.tar.gz
     tar -xzf mars.tar.gz
@@ -62,42 +57,26 @@ if [[ "${task}" == "master" ]]; then
 
     name=saturn
     version=${SATURN_VERSION}
-elif [[ "${task}" == "nightly" ]]; then
-    SATURN_URL=https://github.com/xadrnd/saturn/archive/develop.zip
-    curl --user ${gituser} -skL --retry 3 ${SATURN_URL} -o saturn.zip
-    unzip saturn.zip
-    mv saturn-develop saturn
-
-    MARS_VERSION=$(tail -n 1 saturn/version)
-    MARS_VERSION=${MARS_VERSION#mars }
-    MARS_URL=https://github.com/xadrnd/mars/archive/v${MARS_VERSION}.tar.gz
-    curl --user ${gituser} -skL --retry 3 ${MARS_URL} -o mars.tar.gz
-    tar -xzf mars.tar.gz
-    mv mars-${MARS_VERSION} mars
-
-    name=saturn-nightly
-    version=$(date +%Y%m%d)
-elif [[ "${task}" == "dev" ]]; then
-    MARS_VERSION=$(tail -n 1 ../../version)
-    MARS_VERSION=${MARS_VERSION#mars }
-    MARS_URL=https://github.com/xadrnd/mars/archive/v${MARS_VERSION}.tar.gz
-    curl --user ${gituser} -skL --retry 3 ${MARS_URL} -o mars.tar.gz
-    tar -xzf mars.tar.gz
-    mv mars-${MARS_VERSION} mars
-
-    name=saturn-dev
-    version=$(date +%Y%m%d)
 else
-    if [[ "${task}" != "develop" ]]; then
-        echo "${USAGE}"
-        exit 1
-    fi
     MARS_URL=https://github.com/xadrnd/mars/archive/develop.zip
     curl --user ${gituser} -skL --retry 3 ${MARS_URL} -o mars.zip
     unzip mars.zip
-    mv -f mars-develop mars
+    mv mars-develop mars
 
-    name=saturn-develop
+    if [[ "${task}" == "nightly" ]]; then
+        SATURN_URL=https://github.com/xadrnd/saturn/archive/develop.zip
+        curl --user ${gituser} -skL --retry 3 ${SATURN_URL} -o saturn.zip
+        unzip saturn.zip
+        mv saturn-develop saturn
+
+        name=saturn-nightly
+    else
+        if [[ "${task}" != "dev" ]]; then
+            echo "${USAGE}"
+            exit 1
+        fi
+        name=saturn-dev
+    fi
     version=$(date +%Y%m%d)
 fi
 
@@ -238,6 +217,6 @@ fi
 rm -f mars.tar.gz mars.zip
 rm -f saturn.tar.gz saturn.zip
 rm -f name version Dockerfile pyinstall.py
-rm -rf mars saturn saturn-version
+rm -rf mars saturn
 rm -f /tmp/version
 
