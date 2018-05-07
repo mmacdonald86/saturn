@@ -1,5 +1,5 @@
 #include "saturn/feature_engine.h"
-#include "mars/featurizer.h"
+#include "mars/mars.h"
 
 #include <set>
 
