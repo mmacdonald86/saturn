@@ -106,16 +106,15 @@ cat > ./Dockerfile <<EOF
 FROM ${PARENT}
 USER root
 
-COPY mars /tmp/mars
 EOF
 
 if [[ "${name}" == "saturn" ]] || [[ "${name}" == "saturn-nightly" ]]; then
     cat >> "./Dockerfile" <<EOF
+COPY mars /tmp/mars
 COPY saturn /tmp/saturn
 EOF
 else
     cat >> "./Dockerfile" <<'EOF'
-
 ARG ASTYLE_VERSION=3.1
 ARG ASTYLE_URL=https://sourceforge.net/projects/astyle/files/astyle/astyle%20${ASTYLE_VERSION}/astyle_${ASTYLE_VERSION}_linux.tar.gz/download
 EOF
@@ -158,13 +157,13 @@ RUN echo "deb http://ftp.us.debian.org/debian testing main contrib non-free" >> 
         flex \
         bison \
     \
-    && cp -r /tmp/mars/include/mars /usr/local/include \
-    && cp /tmp/mars/mars/version.py /usr/local/include/mars \
-    \
 EOF
 
 if [[ "${name}" == "saturn" ]] || [[ "${name}" == "saturn-nightly" ]]; then
     cat >> ./Dockerfile << 'EOF'
+    && cp -r /tmp/mars/include/mars /usr/local/include \
+    && cp /tmp/mars/mars/version.py /usr/local/include/mars \
+    \
     && cd /tmp/saturn && make clean && make \
     && cp -r /tmp/saturn/include/saturn /usr/local/include \
     && cp /tmp/saturn/version /usr/local/include/saturn \
@@ -186,6 +185,11 @@ else
     \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/* /tmp/*
+
+COPY mars /tmp/mars
+
+RUN cp -r /tmp/mars/include/mars /usr/local/include \
+    && cp /tmp/mars/mars/version.py /usr/local/include/mars
 EOF
 fi
 

@@ -134,12 +134,14 @@ void run(
     std::vector<ColumnInfo> const & col_info,
     std::vector<std::vector<ColumnValue>> const & request_data,
     std::vector<std::string> const & brand_ids,
-    std::vector<std::vector<double>> user_brand_svr)
+    std::vector<std::vector<double>> user_brand_svr
+    )
 {
+    auto n_req = user_brand_svr[0].size();
     auto timer = Timer();
     timer.start();
 
-    for (size_t i_req = 0; i_req < request_data.size(); i_req++) {
+    for (size_t i_req = 0; i_req < n_req; i_req++) {
         // Ingest request-level fields into feature engine.
         for (size_t i_col = 0; i_col < col_info.size(); i_col++) {
             if (col_info[i_col].type == 's') {
@@ -174,7 +176,7 @@ void run(
 
     timer.stop();
 
-    auto N = request_data.size();
+    auto N = n_req;
     auto n = brand_ids.size();
     std::cout << "processing " << N << " requests:" << std::endl;
     timeit(N, timer);
@@ -200,13 +202,19 @@ int main(int argc, char const * const * argv)
     auto feature_engine = saturn::FeatureEngine();
     auto svr_model = saturn::SvrModel(feature_engine, modelpath);
 
-    auto col_info = read_column_list(modelpath + "/data_test/column_list.txt");
-    auto request_data = read_request_data(modelpath + "/data_test/raw.txt", col_info);
-    auto brand_ids = read_brand_list(modelpath + "/data_test/brand_ids.txt");
+    std::vector<ColumnInfo> col_info; // = read_column_list(modelpath + "/data_test/column_list.txt");
+    std::vector<std::vector<ColumnValue>> request_data; // = read_request_data(modelpath + "/data_test/raw.txt", col_info);
+    std::vector<std::string> brand_ids = read_brand_list(modelpath + "/data_test/brand_ids.txt");
 
     std::vector<std::vector<double>> user_brand_svr;
     for (size_t i = 0; i < brand_ids.size(); i++) {
         user_brand_svr.push_back(read_user_brand_svr(modelpath + "/data_test/user_extlba/" + brand_ids[i] + ".txt"));
+    }
+    auto n = user_brand_svr[0].size();
+    for (size_t i = 1; i < brand_ids.size(); i++) {
+        if (user_brand_svr[i].size() != n) {
+            throw std::runtime_error("user-level SVR files contain different number of records");
+        }
     }
 
     run(feature_engine, svr_model, col_info, request_data, brand_ids, user_brand_svr);

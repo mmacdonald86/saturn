@@ -1,3 +1,8 @@
+Release 0.2.0
+-------------
+- Change to SvrModel internals
+- Upgrade to `mars` 0.3.0, which has header files re-org
+
 Release 0.1.0
 -------------
 - Simplified and forward-looking API for mars called saturn
