@@ -1,10 +1,7 @@
 #include "saturn/common.h"
 #include "saturn/svr_model.h"
 #include "saturn/feature_engine.h"
-#include "mars/catalog_model.h"
-#include "mars/single_model.h"
-#include "mars/featurizer.h"
-#include "mars/utils.h"
+#include "mars/mars.h"
 
 #include <any>
 #include <tuple>
@@ -59,9 +56,19 @@ int SvrModel::run(std::string const & brand_id, double user_brand_svr)
         auto m = static_cast<mars::CatalogModel *>(_mars_model);
         auto z = m->run(x, brand_id);
 
-        auto zz = std::any_cast<mars::ChainModel::result_type>(z);
-        _bid_multiplier = std::any_cast<double>(std::get<0>(zz));
-        _svr = std::get<1>(zz)[0][0];
+        // Version 0:
+        //   CatalogModel contains ChainModel's.
+        //
+        // auto zz = std::any_cast<mars::ChainModel::result_type>(z);
+        // _bid_multiplier = std::any_cast<double>(std::get<0>(zz));
+        // _svr = std::get<1>(zz)[0][0];
+
+        // Version 1:
+        //   CatalogModel contains IsotonicRegression's.
+        //
+        _bid_multiplier = std::any_cast<double>(z);
+        _svr = user_brand_svr;
+
         _message = "";
         return 0;
     } catch (std::exception& e) {
