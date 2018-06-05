@@ -1,13 +1,25 @@
 #include "saturn/common.h"
 #include "saturn/svr_model.h"
 #include "saturn/feature_engine.h"
+#include "saturn/utils.h"
 #include "mars/mars.h"
 
 #include <any>
+#include <cmath> // sqrt
+#include <random>
 #include <tuple>
 
 namespace saturn
 {
+
+std::random_device _rd;
+std::uniform_real_distribution< > _dis;
+
+double uniform() {
+    return _dis(_rd);
+}
+
+
 SvrModel::SvrModel(FeatureEngine & feature_engine, std::string path)
     : _feature_engine(feature_engine)
 {
@@ -48,6 +60,19 @@ SvrModel::~SvrModel()
 int SvrModel::run(std::string const & brand_id, double user_brand_svr)
 {
     try {
+        _svr = user_brand_svr;
+        _message = "";
+
+        // TODO:
+        // the distribution of this multiplier may not be ideal;
+        // generate this with some reference to the multipliers
+        // of the predicted values?
+        if (user_brand_svr < 0.0) {
+            auto z = uniform();
+            _bid_multiplier = z * std::sqrt(z);
+            return 0;
+        }
+
         _feature_engine.update_field(FeatureEngine::FloatField::kUserExtlba, user_brand_svr);
 
         auto f = static_cast<mars::FeatureEngine *>(_feature_engine._mars_feature_engine);
@@ -67,14 +92,12 @@ int SvrModel::run(std::string const & brand_id, double user_brand_svr)
         //   CatalogModel contains IsotonicRegression's.
         //
         _bid_multiplier = std::any_cast<double>(z);
-        _svr = user_brand_svr;
 
-        _message = "";
         return 0;
     } catch (std::exception& e) {
-        _bid_multiplier = 0.;
         _svr = 0.;
         _message = e.what();
+        _bid_multiplier = 0.;
         return 2;
     }
 }
