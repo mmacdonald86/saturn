@@ -1,4 +1,4 @@
-Release 0.3.0
+Release 0.3.1
 -------------
 - Remove build script for Neptune
 - Minor change to `SvrModel`: user-level SVR prediction is treated as random if not found
