@@ -89,7 +89,7 @@ int SvrModel::run(std::string const & brand_id, double user_brand_svr)
         // _svr = std::get<1>(zz)[0][0];
 
         // Version 1:
-        //   CatalogModel contains IsotonicRegression's.
+        //   CatalogModel contains IsotonicRegression or IsotonicLinearInterpolation.
         //
         _bid_multiplier = std::any_cast<double>(z);
 
