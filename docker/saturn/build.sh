@@ -1,3 +1,6 @@
+# This image is NOT built on top of the `mars` image, but rather from scratch,
+# because the Python system in `mars` is not needed here.
+
 read -r -d '' USAGE <<'EOF'
 Usage:
     bash build.sh master|nightly [push]
