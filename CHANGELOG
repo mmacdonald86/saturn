@@ -1,3 +1,7 @@
+Release 0.3.2
+-------------
+- Reduce multiplier for traffic whose predicted SVR is -1
+
 Release 0.3.1
 -------------
 - Remove build script for Neptune
