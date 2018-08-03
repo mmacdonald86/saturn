@@ -5,7 +5,7 @@
 #include "mars/mars.h"
 
 #include <any>
-#include <cmath> // sqrt
+// #include <cmath> // sqrt
 #include <random>
 #include <tuple>
 
@@ -69,7 +69,8 @@ int SvrModel::run(std::string const & brand_id, double user_brand_svr)
         // of the predicted values?
         if (user_brand_svr < 0.0) {
             auto z = uniform();
-            _bid_multiplier = z * std::sqrt(z);
+            // _bid_multiplier = z * std::sqrt(z);
+            _bid_multiplier = z * z * z;
             return 0;
         }
 
