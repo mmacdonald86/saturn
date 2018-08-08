@@ -1,3 +1,8 @@
+Release 0.3.2
+-------------
+- Change multiplier logic for -1 traffic: if don't want to bid, the logic is in Neptune; otherwise,
+  provides a brand-aware appropriately small multiplier, yet to be implemented.
+
 Release 0.3.1
 -------------
 - Remove build script for Neptune

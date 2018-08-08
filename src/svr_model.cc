@@ -5,7 +5,7 @@
 #include "mars/mars.h"
 
 #include <any>
-#include <cmath> // sqrt
+// #include <cmath> // sqrt
 #include <random>
 #include <tuple>
 
@@ -59,17 +59,27 @@ SvrModel::~SvrModel()
 
 int SvrModel::run(std::string const & brand_id, double user_brand_svr)
 {
+    // When `user_brand_svr` is -1, this function provides a brand-aware
+    // appropriately small multiplier. 
+    // (To be implemented later; for now it's a dummy value 0.01.)
+    // If a campaign does not want to bid on -1 traffic, the logic is in Neptune.
+    //
+    // In other words, Neptune needs to know whether a specific campaign wants
+    // to bid on '-1' traffic.
+    // If yes, call this function as usual.
+    // If no, do not call this function; just use multiplier 0.
+
     try {
         _svr = user_brand_svr;
         _message = "";
 
         // TODO:
-        // the distribution of this multiplier may not be ideal;
-        // generate this with some reference to the multipliers
-        // of the predicted values?
+        // provide brand-aware default value for 'user_brand_svr'
+        // if it's not available.
+        // May cache this multiplier per brand, because it can be needed
+        // repeatedly.
         if (user_brand_svr < 0.0) {
-            auto z = uniform();
-            _bid_multiplier = z * std::sqrt(z);
+            _bid_multiplier = 0.01;
             return 0;
         }
 
