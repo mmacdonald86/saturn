@@ -1,6 +1,7 @@
 Release 0.3.2
 -------------
-- Reduce multiplier for traffic whose predicted SVR is -1
+- Change multiplier logic for -1 traffic: if don't want to bid, the logic is in Neptune; otherwise,
+  provides a brand-aware appropriately small multiplier, yet to be implemented.
 
 Release 0.3.1
 -------------
