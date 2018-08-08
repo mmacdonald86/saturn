@@ -60,10 +60,14 @@ SvrModel::~SvrModel()
 int SvrModel::run(std::string const & brand_id, double user_brand_svr)
 {
     // When `user_brand_svr` is -1, this function provides a brand-aware
-    // appropriately small multiplier. (To be implemented later; for now it's a dummy value 0.01.)
+    // appropriately small multiplier. 
+    // (To be implemented later; for now it's a dummy value 0.01.)
     // If a campaign does not want to bid on -1 traffic, the logic is in Neptune.
-    // In that case, Neptune should NOT call this function.
-    // Instead, just use multiplier 0.
+    //
+    // In other words, Neptune needs to know whether a specific campaign wants
+    // to bid on '-1' traffic.
+    // If yes, call this function as usual.
+    // If no, do not call this function; just use multiplier 0.
 
     try {
         _svr = user_brand_svr;
