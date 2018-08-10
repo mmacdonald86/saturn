@@ -9,6 +9,7 @@
 #include <random>
 #include <tuple>
 
+// #include <iostream>
 
 namespace saturn
 {
@@ -16,7 +17,8 @@ namespace saturn
 std::random_device _rd;
 std::uniform_real_distribution< > _dis;
 
-double uniform() {
+double uniform()
+{
     return _dis(_rd);
 }
 
@@ -110,17 +112,17 @@ double SvrModel::_get_default_svr(std::string const & brand_id, int flag) const
             return std::get<1>(val);
         } else {
             throw SaturnError(mars::make_string(
-                "unknown flag value `", flag, "`"
-            ));
+                                  "unknown flag value `", flag, "`"
+                              ));
         }
     } catch (std::exception& e) {
         throw SaturnError(mars::make_string(
-            "failed to get default ",
-            flag == 0 ? "non-LBA" : "LBA",
-            " SVR for brand `",
-            brand_id,
-            "`; additional error message: ",
-            e.what()));
+                              "failed to get default ",
+                              flag == 0 ? "non-LBA" : "LBA",
+                              " SVR for brand `",
+                              brand_id,
+                              "`; additional error message: ",
+                              e.what()));
     }
 }
 
@@ -128,7 +130,7 @@ double SvrModel::_get_default_svr(std::string const & brand_id, int flag) const
 int SvrModel::run(std::string const & brand_id, double user_brand_svr)
 {
     // When `user_brand_svr` is -1, this function provides a brand-aware
-    // appropriately small multiplier. 
+    // appropriately small multiplier.
     // If a campaign does not want to bid on -1 traffic, the logic is in Neptune.
     //
     // In other words, Neptune needs to know whether a specific campaign wants
@@ -153,21 +155,36 @@ int SvrModel::run(std::string const & brand_id, double user_brand_svr)
             auto it = _default_multiplier.find(brand_id);
             if (it == _default_multiplier.end()) {
                 double nonlba_svr = this->_get_default_svr(brand_id, 0);
-                double nonlba_multiplier = this->_calc_multiplier(brand_id, nonlba_svr);
+
+                // double nonlba_multiplier = this->_calc_multiplier(brand_id, nonlba_svr);
+                // DEBUG
+                // temporary work around
+                double nonlba_multiplier = nonlba_svr;
+
                 _default_multiplier[brand_id] = std::make_tuple(nonlba_multiplier, -1.0);
-                _bid_multiplier = nonlba_multiplier;                
+                _bid_multiplier = nonlba_multiplier;
             } else {
-                // double lba_multiplier;
                 auto [nonlba_multiplier, lba_multiplier] = std::get<1>(*it);
                 if (nonlba_multiplier < 0.0) {
+
+                    // DEBUG
+                    // should not fall in this branch now
+                    throw SaturnError(mars::make_string(
+                                          "you are not supposed to get here in this testing"
+                                      ));
+
                     double nonlba_svr = this->_get_default_svr(brand_id, 0);
                     nonlba_multiplier = this->_calc_multiplier(brand_id, nonlba_svr);
                     _default_multiplier[brand_id] = std::make_tuple(nonlba_multiplier, lba_multiplier);
                 }
                 _bid_multiplier = nonlba_multiplier;
             }
+
+            // std::cout << "default multiplier for brand `" << brand_id << "`: " << _bid_multiplier << std::endl;
         } else {
-            _bid_multiplier = this->_calc_multiplier(brand_id, user_brand_svr);
+            // _bid_multiplier = this->_calc_multiplier(brand_id, user_brand_svr);
+            // DEBUG
+            _bid_multiplier = user_brand_svr;
         }
 
         return 0;

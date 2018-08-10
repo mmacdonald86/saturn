@@ -135,7 +135,7 @@ void run(
     std::vector<std::vector<ColumnValue>> const & request_data,
     std::vector<std::string> const & brand_ids,
     std::vector<std::vector<double>> user_brand_svr
-    )
+)
 {
     auto n_req = user_brand_svr[0].size();
     auto timer = Timer();
