@@ -1,3 +1,8 @@
+Release 0.3.3
+-------------
+- Support default SVR per brand for non-LBA and LBA -1 traffic.
+- Implement a temporary short-cut to support upcoming test.
+
 Release 0.3.2
 -------------
 - Change multiplier logic for -1 traffic: if don't want to bid, the logic is in Neptune; otherwise,

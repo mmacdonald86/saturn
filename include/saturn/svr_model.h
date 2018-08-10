@@ -4,6 +4,9 @@
 #include "common.h"
 #include "feature_engine.h"
 
+#include <unordered_map>
+#include <tuple>
+
 
 namespace saturn
 {
@@ -16,6 +19,7 @@ class SvrModel
     //
     //            model_object.data
     //            model_config.json
+    //            default_svr.txt
     //
     // The file `model_object.data` is created by Python code that trains the model.
     // (Specifically, `mars.BaseModel.cc_dump`).
@@ -65,6 +69,13 @@ class SvrModel
     // When there are a large number of models, the developer should try to use the same features and composers
     // across models, unless there are good reasons to differ.
     // Such sharing improves efficiency of internal feature processing.
+    //
+    // The file `default_svr.txt` is a plain text file containing three columns on each line:
+    //
+    // brand_id non_lba_default_svr lba_default_svr
+    //
+    // The file does not contain a header line. The columns are separated by spaces.
+    // This file must contain
 
     ~SvrModel();
 
@@ -90,6 +101,20 @@ class SvrModel
     double _svr = 0.;
     double _bid_multiplier = 0.;
     std::string _message = "";
+
+    double _calc_multiplier(std::string const & brand_id, double user_brand_svr);
+
+    std::unordered_map<std::string, std::tuple<double, double>> _default_svr;
+    // Key is brand ID; value is default SVR value for non-LBA traffic and LBA traffic,
+    // in that order.
+    std::unordered_map<std::string, std::tuple<double, double>> _default_multiplier;
+    // Key is brand ID; value is default multiplier for non-LBA traffic and LBA traffic,
+    // in that order.
+
+    double _get_default_svr(std::string const & brand_id, int flag) const;
+    // flag:
+    // if 0, get non-LBA svr;
+    // if 1, get LBA svr.
 };
 
 }  // namespace
