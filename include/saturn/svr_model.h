@@ -75,13 +75,13 @@ class SvrModel
     // brand_id non_lba_default_svr lba_default_svr
     //
     // The file does not contain a header line. The columns are separated by spaces.
-    // This file must contain
+    // This file must contain all the brands that are going to be called on this class object.
 
     ~SvrModel();
 
     std::string const & model_id() const;
 
-    int run(std::string const & brand_id, double user_brand_svr);
+    int run(std::string const & brand_id, std::string const & adgroup_id, double user_brand_svr);
     // 0 is success; usually no need to check `message()`.
     // Other values indicate problems; check `message()`.
 
@@ -102,13 +102,13 @@ class SvrModel
     double _bid_multiplier = 0.;
     std::string _message = "";
 
-    double _calc_multiplier(std::string const & brand_id, double user_brand_svr);
+    double _calc_multiplier(std::string const & brand_id, std::string const & adgroup_id, double user_brand_svr);
 
     std::unordered_map<std::string, std::tuple<double, double>> _default_svr;
     // Key is brand ID; value is default SVR value for non-LBA traffic and LBA traffic,
     // in that order.
     std::unordered_map<std::string, std::tuple<double, double>> _default_multiplier;
-    // Key is brand ID; value is default multiplier for non-LBA traffic and LBA traffic,
+    // Key is brandid-adgroupid; value is default multiplier for non-LBA traffic and LBA traffic,
     // in that order.
 
     double _get_default_svr(std::string const & brand_id, int flag) const;
