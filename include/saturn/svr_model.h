@@ -75,7 +75,7 @@ class SvrModel
     // brand_id non_lba_default_svr lba_default_svr
     //
     // The file does not contain a header line. The columns are separated by spaces.
-    // This file must contain
+    // This file must contain all the brands that are going to be called on this class object.
 
     ~SvrModel();
 
