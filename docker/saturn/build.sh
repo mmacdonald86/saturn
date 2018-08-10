@@ -83,7 +83,7 @@ else
     version=$(date +%Y%m%d)
 fi
 
-if [[ "${name}" == "saturn" ]] || [[ "${name}" == "saturn-nightly" ]]; then
+if [[ "${task}" == "master" ]] || [[ "${task}" == "nightly" ]]; then
     if [[ $# > 1 ]]; then
         push="$2"
     else
@@ -111,7 +111,7 @@ USER root
 
 EOF
 
-if [[ "${name}" == "saturn" ]] || [[ "${name}" == "saturn-nightly" ]]; then
+if [[ "${task}" == "master" ]] || [[ "${task}" == "nightly" ]]; then
     cat >> "./Dockerfile" <<EOF
 COPY mars /tmp/mars
 COPY saturn /tmp/saturn
@@ -162,7 +162,7 @@ RUN echo "deb http://ftp.us.debian.org/debian testing main contrib non-free" >> 
     \
 EOF
 
-if [[ "${name}" == "saturn" ]] || [[ "${name}" == "saturn-nightly" ]]; then
+if [[ "${task}" == "master" ]] || [[ "${task}" == "nightly" ]]; then
     cat >> ./Dockerfile << 'EOF'
     && cp -r /tmp/mars/include/mars /usr/local/include \
     && cp /tmp/mars/mars/version.py /usr/local/include/mars \
@@ -203,7 +203,7 @@ docker build -t "${NAME}" .
 echo
 
 
-if [[ "${name}" == "saturn" ]] || [[ "${name}" == "saturn-nightly" ]]; then
+if [[ "${task}" == "master" ]] || [[ "${task}" == "nightly" ]]; then
     if [[ "${push}" == "push" ]]; then
         TAG=${ECR_URL}/saturn/${NAME}
 
