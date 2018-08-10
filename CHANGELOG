@@ -1,3 +1,11 @@
+Release 0.4.0
+-------------
+- Remove the temporary short-cut introduced in version 0.3.3.
+- `SvrModel::run` requires additional argument `adgroup_id`, supporting
+  two tags (brand_id and adgroup_id) in the CatalogModel, hence
+  supporting testing multiple versions (to some extent) of models
+  in the same brand.
+
 Release 0.3.3
 -------------
 - Support default SVR per brand for non-LBA and LBA -1 traffic.
