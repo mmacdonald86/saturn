@@ -88,7 +88,7 @@ double SvrModel::_calc_multiplier(std::string const & brand_id, std::string cons
     auto m = static_cast<mars::CatalogModel *>(_mars_model);
 
     std::vector<std::string> tag{brand_id};
-    if (m->n_tags() > 1) {
+    if (adgroup_id.length() > 0 && m->n_tags() > 1) {
         tag.push_back(adgroup_id);
     }
 
@@ -148,6 +148,11 @@ int SvrModel::run(std::string const & brand_id, std::string const & adgroup_id, 
     // For now, LBA default svr and multiplier are not used;
     // only the non-LBA ones are used.
 
+    // If want to get a result for the brand 'overall' (in some sense)
+    // without regard to the specific adgroup, pass in an empty string
+    // for `adgroup_id`. This requires that the CatalogModel contains
+    // an entry tagged by the brand ID.
+
     try {
         _svr = user_brand_svr;
         _message = "";
@@ -160,6 +165,8 @@ int SvrModel::run(std::string const & brand_id, std::string const & adgroup_id, 
             // the default SVR along with the request-level features.
 
             std::string multikey = brand_id + "-" + adgroup_id;
+            // `adgroup_id` may be empty.
+            
             auto it = _default_multiplier.find(multikey);
             if (it == _default_multiplier.end()) {
                 double nonlba_svr = this->_get_default_svr(brand_id, 0);
