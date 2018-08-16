@@ -4,7 +4,7 @@
 #include "common.h"
 #include "feature_engine.h"
 
-#include <unordered_map>
+#include <map>
 #include <tuple>
 
 
@@ -119,10 +119,10 @@ class SvrModel
 
     double _calc_multiplier(std::string const & brand_id, std::string const & adgroup_id, double user_brand_svr, double pacing);
 
-    std::unordered_map<std::string, std::tuple<double, double>> _default_svr;
+    std::map<std::string, std::tuple<double, double>> _default_svr;
     // Key is brand ID; value is default SVR value for non-LBA traffic and LBA traffic,
     // in that order.
-    std::unordered_map<std::string, std::tuple<double, double>> _default_multiplier;
+    std::map<std::string, std::tuple<double, double>> _default_multiplier;
     // Key is brandid-adgroupid; value is default multiplier for non-LBA traffic and LBA traffic,
     // in that order.
 
