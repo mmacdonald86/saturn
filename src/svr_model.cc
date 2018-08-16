@@ -3,6 +3,7 @@
 #include "saturn/feature_engine.h"
 #include "saturn/utils.h"
 #include "mars/mars.h"
+#include "mars/numeric.h"
 
 #include <any>
 #include <fstream>
@@ -78,7 +79,8 @@ SvrModel::~SvrModel()
 }
 
 
-double SvrModel::_calc_multiplier(std::string const & brand_id, std::string const & adgroup_id, double user_brand_svr)
+double SvrModel::_calc_multiplier(std::string const & brand_id, std::string const & adgroup_id, double user_brand_svr,
+                                  double pacing)
 {
     _feature_engine.update_field(FeatureEngine::FloatField::kUserExtlba, user_brand_svr);
 
@@ -88,7 +90,7 @@ double SvrModel::_calc_multiplier(std::string const & brand_id, std::string cons
     auto m = static_cast<mars::CatalogModel *>(_mars_model);
 
     std::vector<std::string> tag{brand_id};
-    if (m->n_tags() > 1) {
+    if (adgroup_id.length() > 0 && m->n_tags() > 1) {
         tag.push_back(adgroup_id);
     }
 
@@ -105,7 +107,23 @@ double SvrModel::_calc_multiplier(std::string const & brand_id, std::string cons
     //   CatalogModel contains IsotonicRegression or IsotonicLinearInterpolation.
     //
 
-    return std::any_cast<double>(z);
+    double quantile = std::any_cast<double>(z);
+
+    const double sigma = 0.5;
+    double mu;
+    if (pacing < 0.0) {
+        mu = 0.;
+    } else {
+        if (pacing > 1.0) {
+            throw SaturnError(mars::make_string(
+                                  "argument `pacing` must be in {-1, [0, 1]}; got ",
+                                  pacing
+                              ));
+        }
+        mu = pacing * pacing * 2 - 1.;
+        // Square, stretch to [0, 2], shift to [-1, 1].
+    }
+    return mars::logitnormal_cdf(quantile, mu, sigma);
 }
 
 
@@ -134,7 +152,7 @@ double SvrModel::_get_default_svr(std::string const & brand_id, int flag) const
 }
 
 
-int SvrModel::run(std::string const & brand_id, std::string const & adgroup_id, double user_brand_svr)
+int SvrModel::run(std::string const & brand_id, std::string const & adgroup_id, double user_brand_svr, double pacing)
 {
     // When `user_brand_svr` is -1, this function provides a brand-aware
     // appropriately small multiplier.
@@ -148,6 +166,11 @@ int SvrModel::run(std::string const & brand_id, std::string const & adgroup_id, 
     // For now, LBA default svr and multiplier are not used;
     // only the non-LBA ones are used.
 
+    // If want to get a result for the brand 'overall' (in some sense)
+    // without regard to the specific adgroup, pass in an empty string
+    // for `adgroup_id`. This requires that the CatalogModel contains
+    // an entry tagged by the brand ID.
+
     try {
         _svr = user_brand_svr;
         _message = "";
@@ -160,10 +183,12 @@ int SvrModel::run(std::string const & brand_id, std::string const & adgroup_id, 
             // the default SVR along with the request-level features.
 
             std::string multikey = brand_id + "-" + adgroup_id;
+            // `adgroup_id` may be empty.
+
             auto it = _default_multiplier.find(multikey);
             if (it == _default_multiplier.end()) {
                 double nonlba_svr = this->_get_default_svr(brand_id, 0);
-                double nonlba_multiplier = this->_calc_multiplier(brand_id, adgroup_id, nonlba_svr);
+                double nonlba_multiplier = this->_calc_multiplier(brand_id, adgroup_id, nonlba_svr, pacing);
                 _default_multiplier[multikey] = std::make_tuple(nonlba_multiplier, -1.0);
                 _bid_multiplier = nonlba_multiplier;
             } else {
@@ -177,7 +202,7 @@ int SvrModel::run(std::string const & brand_id, std::string const & adgroup_id, 
                                       ));
 
                     double nonlba_svr = this->_get_default_svr(brand_id, 0);
-                    nonlba_multiplier = this->_calc_multiplier(brand_id, adgroup_id, nonlba_svr);
+                    nonlba_multiplier = this->_calc_multiplier(brand_id, adgroup_id, nonlba_svr, pacing);
                     _default_multiplier[multikey] = std::make_tuple(nonlba_multiplier, lba_multiplier);
                 }
                 _bid_multiplier = nonlba_multiplier;
@@ -185,7 +210,7 @@ int SvrModel::run(std::string const & brand_id, std::string const & adgroup_id, 
 
             // std::cout << "default multiplier for brand `" << brand_id << "`, adgroup `" << adgroup_id << "`: " << _bid_multiplier << std::endl;
         } else {
-            _bid_multiplier = this->_calc_multiplier(brand_id, adgroup_id, user_brand_svr);
+            _bid_multiplier = this->_calc_multiplier(brand_id, adgroup_id, user_brand_svr, pacing);
         }
 
         return 0;

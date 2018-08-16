@@ -130,7 +130,7 @@ void timeit(long n, Timer const & timer)
 
 void run(
     FeatureEngine & feature_engine,
-    SvrModel & svr_model,
+    SvrModel * svr_model,
     std::vector<ColumnInfo> const & col_info,
     std::vector<std::vector<ColumnValue>> const & request_data,
     std::vector<std::string> const & brand_ids,
@@ -165,11 +165,11 @@ void run(
         for (size_t i_brand = 0; i_brand < brand_ids.size(); i_brand++) {
             std::string brand_id = brand_ids[i_brand];
             double user_svr = user_brand_svr[i_brand][i_req];
-            if (svr_model.run(brand_id, "", user_svr) == 0) {
-                double svr = svr_model.svr();
-                double mult = svr_model.bid_multiplier();
+            if (svr_model->run(brand_id, "", user_svr) == 0) {
+                double svr = svr_model->svr();
+                double mult = svr_model->bid_multiplier();
             } else {
-                std::cout << "oooops " << svr_model.message() << std::endl;
+                std::cout << "oooops " << svr_model->message() << std::endl;
             }
         }
     }
@@ -200,7 +200,7 @@ int main(int argc, char const * const * argv)
     }
 
     auto feature_engine = saturn::FeatureEngine();
-    auto svr_model = saturn::SvrModel(feature_engine, modelpath);
+    auto svr_model = new saturn::SvrModel(feature_engine, modelpath);
 
     std::vector<ColumnInfo> col_info; // = read_column_list(modelpath + "/data_test/column_list.txt");
     std::vector<std::vector<ColumnValue>> request_data; // = read_request_data(modelpath + "/data_test/raw.txt", col_info);
@@ -218,6 +218,8 @@ int main(int argc, char const * const * argv)
     }
 
     run(feature_engine, svr_model, col_info, request_data, brand_ids, user_brand_svr);
+
+    delete svr_model;
 
     return 0;
 }

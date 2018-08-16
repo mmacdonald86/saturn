@@ -12,7 +12,7 @@ libsaturn.so: src/feature_engine.cc src/svr_model.cc src/utils.cc
 	$(CC) -std=c++17 $(CCFLAGS) -Iinclude -fPIC -shared $^ $(LIBS) -o $@
 
 do_svr: benchmarks/do_svr.cc
-	$(CC) $(CCFLAGS) -Iinclude $^ ./libsaturn.so $(LIBS) -o do_svr
+	$(CC) -std=c++11 $(CCFLAGS) -Iinclude $^ ./libsaturn.so $(LIBS) -o do_svr
 
 clean:
 	rm -f *.o
