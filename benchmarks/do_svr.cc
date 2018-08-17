@@ -165,7 +165,8 @@ void run(
         for (size_t i_brand = 0; i_brand < brand_ids.size(); i_brand++) {
             std::string brand_id = brand_ids[i_brand];
             double user_svr = user_brand_svr[i_brand][i_req];
-            if (svr_model->run(brand_id, "", user_svr) == 0) {
+            if (svr_model->run(brand_id, brand_id, user_svr) == 0) {
+                // Use "brand_id" to fake "adgroup_id"
                 double svr = svr_model->svr();
                 double mult = svr_model->bid_multiplier();
             } else {

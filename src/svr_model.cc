@@ -4,25 +4,16 @@
 #include "saturn/utils.h"
 #include "mars/mars.h"
 #include "mars/numeric.h"
+#include "mars/utils.h"
 
 #include <any>
 #include <fstream>
-#include <random>
 #include <tuple>
 
-// #include <iostream>
+#include <iostream>
 
 namespace saturn
 {
-
-std::random_device _rd;
-std::uniform_real_distribution< > _dis;
-
-double uniform()
-{
-    return _dis(_rd);
-}
-
 
 SvrModel::SvrModel(FeatureEngine & feature_engine, std::string path)
     : _feature_engine(feature_engine)
@@ -70,6 +61,17 @@ SvrModel::SvrModel(FeatureEngine & feature_engine, std::string path)
                               _path + "/default_svr.txt",
                               "`"));
     }
+
+    // Read in parameters for multiplier curve.
+    auto infile_curve = std::ifstream(_path + "/multiplier_curve.txt");
+    if (infile_curve.is_open()) {
+        std::string adgroup_id;
+        double mu, sigma;
+        while (infile_curve >> adgroup_id >> mu >> sigma) {
+            _multiplier_curve.emplace(adgroup_id, std::make_tuple(mu, sigma));
+        }
+        infile_curve.close();
+    }
 }
 
 
@@ -109,20 +111,27 @@ double SvrModel::_calc_multiplier(std::string const & brand_id, std::string cons
 
     double quantile = std::any_cast<double>(z);
 
-    const double sigma = 0.5;
-    double mu;
-    if (pacing < 0.0) {
-        mu = 0.;
+    double mu, sigma;
+    auto it = _multiplier_curve.find(adgroup_id);
+    if (it != _multiplier_curve.end()) {
+        mu = std::get<0>(std::get<1>(*it));
+        sigma = std::get<1>(std::get<1>(*it));
     } else {
-        if (pacing > 1.0) {
-            throw SaturnError(mars::make_string(
-                                  "argument `pacing` must be in {-1, [0, 1]}; got ",
-                                  pacing
-                              ));
+        sigma = 0.5;
+        if (pacing < 0.0) {
+            mu = 0.;
+        } else {
+            if (pacing > 1.0) {
+                throw SaturnError(mars::make_string(
+                                    "argument `pacing` must be in {-1, [0, 1]}; got ",
+                                    pacing
+                                ));
+            }
+            mu = pacing * pacing * 2 - 1.;
+            // Square, stretch to [0, 2], shift to [-1, 1].
         }
-        mu = pacing * pacing * 2 - 1.;
-        // Square, stretch to [0, 2], shift to [-1, 1].
     }
+    std::cout << "adgroup " << adgroup_id << ": " << mu << ", " << sigma << std::endl;
     return mars::logitnormal_cdf(quantile, mu, sigma);
 }
 

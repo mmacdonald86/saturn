@@ -20,6 +20,7 @@ class SvrModel
     //            model_object.data
     //            model_config.json
     //            default_svr.txt
+    //            multiplier_curves.txt   (optional)
     //
     // The file `model_object.data` is created by Python code that trains the model.
     // (Specifically, `mars.BaseModel.cc_dump`).
@@ -76,6 +77,19 @@ class SvrModel
     //
     // The file does not contain a header line. The columns are separated by spaces.
     // This file must contain all the brands that are going to be called on this class object.
+    //
+    // The file `multiplier_curves.txt`, if present, is a plain text file containing
+    // parameters for the quantile-multiplier curve. The file has 3 columns:
+    //
+    // adgroups_id  mu  sigma
+    //
+    // `mu` (-inf to inf) and `sigma` (> 0) are the two parameters for the C++ function
+    // `logitnormal_cdf` in `mars/numeric.h`, or the Python function `logitnormal_cdf`
+    // in mars.utils.scurve.
+    //
+    // This is for testing different settings of the curve. This function does not
+    // need to contain all adgroups. Any adgroup that does not show up in this file
+    // will use a default setting.
 
     ~SvrModel();
 
@@ -125,6 +139,10 @@ class SvrModel
     std::map<std::string, std::tuple<double, double>> _default_multiplier;
     // Key is brandid-adgroupid; value is default multiplier for non-LBA traffic and LBA traffic,
     // in that order.
+
+    std::map<std::string, std::tuple<double, double>> _multiplier_curve;
+    // Key is adgroup_id; value is `mu` and `sigma` for function
+    // `logitnormal_cdf`.
 
     double _get_default_svr(std::string const & brand_id, int flag) const;
     // flag:
