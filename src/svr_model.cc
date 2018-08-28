@@ -10,7 +10,7 @@
 #include <fstream>
 #include <tuple>
 
-#include <iostream>
+// #include <iostream>
 
 namespace saturn
 {
@@ -131,7 +131,6 @@ double SvrModel::_calc_multiplier(std::string const & brand_id, std::string cons
             // Square, stretch to [0, 2], shift to [-1, 1].
         }
     }
-    std::cout << "adgroup " << adgroup_id << ": " << mu << ", " << sigma << std::endl;
     return mars::logitnormal_cdf(quantile, mu, sigma);
 }
 
