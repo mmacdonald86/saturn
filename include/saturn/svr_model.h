@@ -95,7 +95,7 @@ class SvrModel
 
     std::string const & model_id() const;
 
-    int run(std::string const & brand_id, std::string const & adgroup_id, double user_brand_svr, double pacing = -1.);
+    int run(std::string const & brand_id, std::string const & adgroup_id, double user_adgroup_svr, double pacing = -1.);
     // 0 is success; usually no need to check `message()`.
     // Other values indicate problems; check `message()`.
     //
@@ -131,13 +131,13 @@ class SvrModel
     double _bid_multiplier = 0.;
     std::string _message = "";
 
-    double _calc_multiplier(std::string const & brand_id, std::string const & adgroup_id, double user_brand_svr, double pacing);
+    double _calc_multiplier(std::string const & adgroup_id, double user_adgroup_svr, double pacing);
 
     std::map<std::string, std::tuple<double, double>> _default_svr;
     // Key is brand ID; value is default SVR value for non-LBA traffic and LBA traffic,
     // in that order.
     std::map<std::string, std::tuple<double, double>> _default_multiplier;
-    // Key is brandid-adgroupid; value is default multiplier for non-LBA traffic and LBA traffic,
+    // Key is adgroupid; value is default multiplier for non-LBA traffic and LBA traffic,
     // in that order.
 
     std::map<std::string, std::tuple<double, double>> _multiplier_curve;
