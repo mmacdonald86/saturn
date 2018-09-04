@@ -214,16 +214,15 @@ if [[ "${task}" == "master" ]] || [[ "${task}" == "nightly" ]]; then
         docker push ${TAG}
     fi
 else
-    curl --user ${gituser} -s https://raw.githubusercontent.com/xadrnd/mars/master/docker/pyinstall.py -o ./pyinstall.py
-    python ./pyinstall.py \
-        --imgname=${name} \
-        --imgversion=${version} \
-        --cmd=${name}
+    rm -f ./install.sh
+    curl --user ${gituser} -s https://raw.githubusercontent.com/xadrnd/mars/master/docker/install.sh -o ./install.sh
+    bash ./install.sh ${name} ${version}
+    rm -f ./install.sh
 fi
 
 rm -f mars.tar.gz mars.zip
 rm -f saturn.tar.gz saturn.zip
-rm -f name version Dockerfile pyinstall.py
+rm -f name version Dockerfile
 rm -rf mars saturn
 rm -f /tmp/version
 
