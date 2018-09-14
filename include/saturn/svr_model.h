@@ -20,7 +20,7 @@ class SvrModel
     //            model_object.data
     //            model_config.json
     //            default_svr.txt
-    //            multiplier_curves.txt   (optional)
+    //            multiplier_curve.txt   (optional)
     //
     // The file `model_object.data` is created by Python code that trains the model.
     // (Specifically, `mars.BaseModel.cc_dump`).
