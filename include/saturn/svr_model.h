@@ -95,6 +95,8 @@ class SvrModel
 
     std::string const & model_id() const;
 
+    bool has_model(std::string const & adgroup_id) const;
+    
     int run(std::string const & brand_id, std::string const & adgroup_id, double user_adgroup_svr, double pacing = -1.);
     // 0 is success; usually no need to check `message()`.
     // Other values indicate problems; check `message()`.
