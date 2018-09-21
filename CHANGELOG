@@ -1,3 +1,8 @@
+Release 0.5.3
+-------------
+- SvrModel gets new public method 'has_model'.
+- Move Docker image definition out of the repo.
+
 Release 0.5.2
 -------------
 - SvrModel expects a CatalogModel whose tag consists of adgroup-id only (no brand-id).
