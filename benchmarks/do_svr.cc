@@ -205,6 +205,9 @@ void run(
         // Run SVR model for each adgroup.
         for (size_t i_adgroup = 0; i_adgroup < adgroup_ids.size(); i_adgroup++) {
             std::string adgroup_id = adgroup_ids[i_adgroup];
+            if (!svr_model->has_model(adgroup_id)) {
+                throw std::runtime_error(std::string("adgroup ") + adgroup_id + " is not recognized by model!");
+            }
             // std::cout << "adgroup " << adgroup_id << std::endl;
             std::string brand_id = adgroup_id;  // actual brand_id plays no role in this test
             double user_svr = user_adgroup_svr[i_adgroup][i_req];
