@@ -1,7 +1,4 @@
-docker/saturn/name
-docker/saturn/version
-docker/saturn/Dockerfile
 **/*.o
 **/*.so
 .vscode/
-benchmarks/svr/do_svr
+do_svr
