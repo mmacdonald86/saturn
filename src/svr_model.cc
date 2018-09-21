@@ -156,6 +156,13 @@ double SvrModel::_get_default_svr(std::string const & brand_id, int flag) const
 }
 
 
+bool SvrModel::has_model(std::string const & adgroup_id) const
+{
+    auto m = static_cast<mars::CatalogModel *>(_mars_model);
+    return m->has_model(adgroup_id);
+}
+
+
 int SvrModel::run(std::string const & brand_id, std::string const & adgroup_id, double user_adgroup_svr, double pacing)
 {
     // When `user_adgroup_svr` is -1, this function provides a brand-aware
