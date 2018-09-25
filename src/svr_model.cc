@@ -10,7 +10,7 @@
 #include <fstream>
 #include <tuple>
 
-// #include <iostream>
+#include <iostream>
 
 namespace saturn
 {
@@ -31,8 +31,46 @@ SvrModel::SvrModel(FeatureEngine & feature_engine, std::string path)
 
     auto f = static_cast<mars::FeatureEngine *>(_feature_engine._mars_feature_engine);
     mars::JsonReader jreader((_path + "/model_config.json").c_str());
-    jreader.seek("features");
+    jreader.seek("/", "features");
     _composer_id = f->add_composer(jreader);
+
+    jreader.seek("/", "default_multiplier_curve");
+    _default_multiplier_curve_mu = jreader.get_scalar<double>("mu");
+    _default_multiplier_curve_sigma = jreader.get_scalar<double>("sigma");
+
+    _default_multiplier_cap = jreader.get_scalar<double>("/", "default_multiplier_cap");
+
+    if (jreader.has_member("/", "adgroup_multiplier_curve")) {
+        jreader.seek("/", "adgroup_multiplier_curve");
+        std::string adgroup_id;
+        double mu, sigma;
+        auto n = jreader.get_array_size();
+        for (size_t i = 0; i < n; i++) {
+            jreader.save_cursor();
+            jreader.seek_in_array(i);
+            adgroup_id = jreader.get_scalar<std::string>("adgroup_id");
+            mu = jreader.get_scalar<double>("mu");
+            sigma = jreader.get_scalar<double>("sigma");
+            _adgroup_multiplier_curve.emplace(adgroup_id, std::make_tuple(mu, sigma));
+            jreader.restore_cursor();
+        }
+    }
+
+    if (jreader.has_member("/", "adgroup_multiplier_cap")) {
+        jreader.seek("/", "adgroup_multiplier_cap");
+        std::string adgroup_id;
+        double cap;
+        auto n = jreader.get_array_size();
+        for (size_t i = 0; i < n; i++) {
+            jreader.save_cursor();
+            jreader.seek_in_array(i);
+            adgroup_id = jreader.get_scalar<std::string>("adgroup_id");
+            cap = jreader.get_scalar<double>("cap");
+            _adgroup_multiplier_cap.emplace(adgroup_id, cap);
+            jreader.restore_cursor();
+        }
+    }
+
 
     mars::AvroReader areader((_path + "/model_object.data").c_str());
     auto const class_name = areader.get_scalar<std::string>("class_name");
@@ -47,30 +85,19 @@ SvrModel::SvrModel(FeatureEngine & feature_engine, std::string path)
     _mars_model = static_cast<void *>(model.release());
 
     // Read in default svr file.
-    auto infile_svr = std::ifstream(_path + "/default_svr.txt");
+    auto infile_svr = std::ifstream(_path + "/brand_default_svr.txt");
     if (infile_svr.is_open()) {
         std::string brand_id;
         double nonlba_svr, lba_svr;
         while (infile_svr >> brand_id >> nonlba_svr >> lba_svr) {
-            _default_svr.emplace(brand_id, std::make_tuple(nonlba_svr, lba_svr));
+            _brand_default_svr.emplace(brand_id, std::make_tuple(nonlba_svr, lba_svr));
         }
         infile_svr.close();
     } else {
         throw SaturnError(mars::make_string(
                               "failed to read file `",
-                              _path + "/default_svr.txt",
+                              _path + "/brand_default_svr.txt",
                               "`"));
-    }
-
-    // Read in parameters for multiplier curve.
-    auto infile_curve = std::ifstream(_path + "/multiplier_curve.txt");
-    if (infile_curve.is_open()) {
-        std::string adgroup_id;
-        double mu, sigma;
-        while (infile_curve >> adgroup_id >> mu >> sigma) {
-            _multiplier_curve.emplace(adgroup_id, std::make_tuple(mu, sigma));
-        }
-        infile_curve.close();
     }
 }
 
@@ -108,14 +135,14 @@ double SvrModel::_calc_multiplier(std::string const & adgroup_id, double user_ad
     double quantile = std::any_cast<double>(z);
 
     double mu, sigma;
-    auto it = _multiplier_curve.find(adgroup_id);
-    if (it != _multiplier_curve.end()) {
+    auto it = _adgroup_multiplier_curve.find(adgroup_id);
+    if (it != _adgroup_multiplier_curve.end()) {
         mu = std::get<0>(std::get<1>(*it));
         sigma = std::get<1>(std::get<1>(*it));
     } else {
-        sigma = 0.5;
-        if (pacing < 0.0) {
-            mu = 0.;
+        sigma = _default_multiplier_curve_sigma;
+        if (pacing < 0.0) {  // No pacing info; use default
+            mu = _default_multiplier_curve_mu;
         } else {
             if (pacing > 1.0) {
                 throw SaturnError(mars::make_string(
@@ -134,7 +161,7 @@ double SvrModel::_calc_multiplier(std::string const & adgroup_id, double user_ad
 double SvrModel::_get_default_svr(std::string const & brand_id, int flag) const
 {
     try {
-        auto val = _default_svr.at(brand_id);
+        auto val = _brand_default_svr.at(brand_id);
         if (flag == 0) {
             return std::get<0>(val);
         } else if (flag == 1) {
@@ -188,11 +215,11 @@ int SvrModel::run(std::string const & brand_id, std::string const & adgroup_id, 
             // we'll need to re-calculate the multiplier using
             // the default SVR along with the request-level features.
 
-            auto it = _default_multiplier.find(adgroup_id);
-            if (it == _default_multiplier.end()) {
+            auto it = _adgroup_default_multiplier.find(adgroup_id);
+            if (it == _adgroup_default_multiplier.end()) {
                 double nonlba_svr = this->_get_default_svr(brand_id, 0);
                 double nonlba_multiplier = this->_calc_multiplier(adgroup_id, nonlba_svr, pacing);
-                _default_multiplier[adgroup_id] = std::make_tuple(nonlba_multiplier, -1.0);
+                _adgroup_default_multiplier[adgroup_id] = std::make_tuple(nonlba_multiplier, -1.0);
                 _bid_multiplier = nonlba_multiplier;
             } else {
                 auto [nonlba_multiplier, lba_multiplier] = std::get<1>(*it);
@@ -206,7 +233,7 @@ int SvrModel::run(std::string const & brand_id, std::string const & adgroup_id, 
 
                     double nonlba_svr = this->_get_default_svr(brand_id, 0);
                     nonlba_multiplier = this->_calc_multiplier(adgroup_id, nonlba_svr, pacing);
-                    _default_multiplier[adgroup_id] = std::make_tuple(nonlba_multiplier, lba_multiplier);
+                    _adgroup_default_multiplier[adgroup_id] = std::make_tuple(nonlba_multiplier, lba_multiplier);
                 }
                 _bid_multiplier = nonlba_multiplier;
             }
@@ -214,7 +241,14 @@ int SvrModel::run(std::string const & brand_id, std::string const & adgroup_id, 
             _bid_multiplier = this->_calc_multiplier(adgroup_id, user_adgroup_svr, pacing);
         }
 
+        auto it = _adgroup_multiplier_cap.find(adgroup_id);
+        if (it == _adgroup_multiplier_cap.end()) {
+            _bid_multiplier *= _default_multiplier_cap;
+        } else {
+            _bid_multiplier *= _adgroup_multiplier_cap[adgroup_id];
+        }
         return 0;
+
     } catch (std::exception& e) {
         _svr = 0.;
         _message = e.what();
