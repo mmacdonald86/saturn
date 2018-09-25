@@ -19,8 +19,7 @@ class SvrModel
     //
     //            model_object.data
     //            model_config.json
-    //            default_svr.txt
-    //            multiplier_curve.txt   (optional)
+    //            brand_default_svr.txt
     //
     // The file `model_object.data` is created by Python code that trains the model.
     // (Specifically, `mars.BaseModel.cc_dump`).
@@ -54,10 +53,44 @@ class SvrModel
     //             "type": "HashedColumnBundle",
     //             "args": {"columns": ["age", "purchase_amount", "domain_name"], "n_predictors": 12}
     //         }
+    //     ],
+    //    "default_multiplier_curve": {"mu": 0.0, "sigma": 0.5},
+    //    "default_multiplier_cap": 1.5,
+    //    "adgroup_multiplier_curve": [
+    //         {
+    //             "adgroup_id": "abc",
+    //             "mu": 0.3,
+    //             "sigma": 1.5
+    //         },
+    //         {
+    //             "adgroup_id": 'def",
+    //             "mu": 0.4,
+    //             "sigma": 2.5
+    //         }
+    //     ],
+    //    "adgroup_multiplier_cap": [
+    //         {
+    //             "adgroup_id": "aaa",
+    //             "cap": 2.0
+    //         },
+    //         {
+    //             "adgroup_id": "bbb",
+    //             "cap": 3.0
+    //         }
     //     ]
     //  }
     //
     // In this config, `type` is the exact class name of a subclass of `mars::Model`.
+    //
+    // The sections "adgroup_multiplier_curve" and "adgroup_multiplier_cap" are optional;
+    // they can be missing, or be present with a value of empty list.
+    //
+    // In section "adgroup_multiplier_curve",
+    // `mu` (-inf to inf) and `sigma` (> 0) are the two parameters for the C++ function
+    // `logitnormal_cdf` in `mars/numeric.h`, or the Python function `logitnormal_cdf`
+    // in mars.utils.scurve.
+    // This section does not need to contain all adgroups. 
+    // Any adgroup that does not show up in this section will use a default setting.
     //
     // The listing of `features` implicitly defines a `FeatureComposer` for this model to use.
     // If any of these features is already present in `feature_engine`, then the existing one is re-used.
@@ -71,25 +104,13 @@ class SvrModel
     // across models, unless there are good reasons to differ.
     // Such sharing improves efficiency of internal feature processing.
     //
-    // The file `default_svr.txt` is a plain text file containing three columns on each line:
+    // The file `brand_default_svr.txt` is a plain text file containing three columns on each line:
     //
     // brand_id non_lba_default_svr lba_default_svr
     //
     // The file does not contain a header line. The columns are separated by spaces.
     // This file must contain all the brands that are going to be called on this class object.
-    //
-    // The file `multiplier_curves.txt`, if present, is a plain text file containing
-    // parameters for the quantile-multiplier curve. The file has 3 columns:
-    //
-    // adgroups_id  mu  sigma
-    //
-    // `mu` (-inf to inf) and `sigma` (> 0) are the two parameters for the C++ function
-    // `logitnormal_cdf` in `mars/numeric.h`, or the Python function `logitnormal_cdf`
-    // in mars.utils.scurve.
-    //
-    // This is for testing different settings of the curve. This function does not
-    // need to contain all adgroups. Any adgroup that does not show up in this file
-    // will use a default setting.
+
 
     ~SvrModel();
 
@@ -135,16 +156,21 @@ class SvrModel
 
     double _calc_multiplier(std::string const & adgroup_id, double user_adgroup_svr, double pacing);
 
-    std::map<std::string, std::tuple<double, double>> _default_svr;
+    std::map<std::string, std::tuple<double, double>> _brand_default_svr;
     // Key is brand ID; value is default SVR value for non-LBA traffic and LBA traffic,
     // in that order.
-    std::map<std::string, std::tuple<double, double>> _default_multiplier;
+    std::map<std::string, std::tuple<double, double>> _adgroup_default_multiplier;
     // Key is adgroupid; value is default multiplier for non-LBA traffic and LBA traffic,
     // in that order.
 
-    std::map<std::string, std::tuple<double, double>> _multiplier_curve;
+    double _default_multiplier_curve_mu;
+    double _default_multiplier_curve_sigma;
+    std::map<std::string, std::tuple<double, double>> _adgroup_multiplier_curve;
     // Key is adgroup_id; value is `mu` and `sigma` for function
     // `logitnormal_cdf`.
+
+    double _default_multiplier_cap;
+    std::map<std::string, double> _adgroup_multiplier_cap;
 
     double _get_default_svr(std::string const & brand_id, int flag) const;
     // flag:

@@ -1,3 +1,8 @@
+Release 0.5.4
+-------------
+- Move some temporary config files into 'model_config.json'.
+- Add configurable multiplier cap.
+
 Release 0.5.3
 -------------
 - SvrModel gets new public method 'has_model'.
