@@ -1,3 +1,8 @@
+Release 0.5.5
+-------------
+- Add more optional elements to 'model_config.json'.
+- Make most config input optional, using in-code default is the last fallback.
+
 Release 0.5.4
 -------------
 - Move some temporary config files into 'model_config.json'.

@@ -54,6 +54,9 @@ class SvrModel
     //             "args": {"columns": ["age", "purchase_amount", "domain_name"], "n_predictors": 12}
     //         }
     //     ],
+    //    "default_nonlba_svr": 0.0001,
+    //    "default_lba_svr": 0.001,
+    //    "adjust_multiplier_curve_for_pacing": 0,
     //    "default_multiplier_curve": {"mu": 0.0, "sigma": 0.5},
     //    "default_multiplier_cap": 1.5,
     //    "adgroup_multiplier_curve": [
@@ -89,7 +92,7 @@ class SvrModel
     // `mu` (-inf to inf) and `sigma` (> 0) are the two parameters for the C++ function
     // `logitnormal_cdf` in `mars/numeric.h`, or the Python function `logitnormal_cdf`
     // in mars.utils.scurve.
-    // This section does not need to contain all adgroups. 
+    // This section does not need to contain all adgroups.
     // Any adgroup that does not show up in this section will use a default setting.
     //
     // The listing of `features` implicitly defines a `FeatureComposer` for this model to use.
@@ -117,7 +120,7 @@ class SvrModel
     std::string const & model_id() const;
 
     bool has_model(std::string const & adgroup_id) const;
-    
+
     int run(std::string const & brand_id, std::string const & adgroup_id, double user_adgroup_svr, double pacing = -1.);
     // 0 is success; usually no need to check `message()`.
     // Other values indicate problems; check `message()`.
@@ -159,18 +162,24 @@ class SvrModel
     std::map<std::string, std::tuple<double, double>> _brand_default_svr;
     // Key is brand ID; value is default SVR value for non-LBA traffic and LBA traffic,
     // in that order.
+    double _default_nonlba_svr = 0.0001;
+    double _default_lba_svr = 0.001;
+
     std::map<std::string, std::tuple<double, double>> _adgroup_default_multiplier;
     // Key is adgroupid; value is default multiplier for non-LBA traffic and LBA traffic,
     // in that order.
 
-    double _default_multiplier_curve_mu;
-    double _default_multiplier_curve_sigma;
+    double _default_multiplier_curve_mu = 0.;
+    double _default_multiplier_curve_sigma = 0.5;
     std::map<std::string, std::tuple<double, double>> _adgroup_multiplier_curve;
     // Key is adgroup_id; value is `mu` and `sigma` for function
     // `logitnormal_cdf`.
 
-    double _default_multiplier_cap;
+    double _default_multiplier_cap = 2.;
     std::map<std::string, double> _adgroup_multiplier_cap;
+
+    double _adjust_multiplier_curve_for_pacing = 0.;
+    // Typically values are 0, 1, 2; recommended value for now is 1.
 
     double _get_default_svr(std::string const & brand_id, int flag) const;
     // flag:
