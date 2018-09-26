@@ -6,17 +6,17 @@ The benchmark program takes a directory that contains
 - model_object.data
 - data_test/
 |     |- column_list.txt
-|     |- adgroup_ids.txt 
+|     |- adgroup_ids.txt
 |     |- raw.txt
 |     |- user_extlba/
 |     |      |- adgroup_id_1.txt
 |     |      |- adgroup_id_2.txt
-|     |      |- ...           
+|     |      |- ...
 ```
 
 `raw.txt` is a tab-separated csv file containing feature values *except* user-level SVR prediction.
 Usually this file should have at least 10 thousand rows.
-**This file is ignored (its presence is optional), because the model uses a single feature, 
+**This file is ignored (its presence is optional), because the model uses a single feature,
 which is 'user-level SVR prediction'.**
 
 `column_list.txt` contains name/type pairs of features in `raw.txt`, in corresponding order.

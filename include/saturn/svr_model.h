@@ -92,7 +92,7 @@ class SvrModel
     // `mu` (-inf to inf) and `sigma` (> 0) are the two parameters for the C++ function
     // `logitnormal_cdf` in `mars/numeric.h`, or the Python function `logitnormal_cdf`
     // in mars.utils.scurve.
-    // This section does not need to contain all adgroups. 
+    // This section does not need to contain all adgroups.
     // Any adgroup that does not show up in this section will use a default setting.
     //
     // The listing of `features` implicitly defines a `FeatureComposer` for this model to use.
@@ -120,7 +120,7 @@ class SvrModel
     std::string const & model_id() const;
 
     bool has_model(std::string const & adgroup_id) const;
-    
+
     int run(std::string const & brand_id, std::string const & adgroup_id, double user_adgroup_svr, double pacing = -1.);
     // 0 is success; usually no need to check `message()`.
     // Other values indicate problems; check `message()`.

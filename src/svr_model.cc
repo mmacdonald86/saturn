@@ -164,9 +164,9 @@ double SvrModel::_calc_multiplier(std::string const & adgroup_id, double user_ad
         } else {
             if (pacing > 1.0) {
                 throw SaturnError(mars::make_string(
-                                    "argument `pacing` must be in {-1, [0, 1]}; got ",
-                                    pacing
-                                ));
+                                      "argument `pacing` must be in {-1, [0, 1]}; got ",
+                                      pacing
+                                  ));
             }
             mu = (pacing * pacing * 2 - 1.) * _adjust_multiplier_curve_for_pacing;
             // Square, stretch to [0, 2], shift to [-1, 1], scale to
