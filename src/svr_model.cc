@@ -45,6 +45,16 @@ SvrModel::SvrModel(FeatureEngine & feature_engine, std::string path)
         _default_multiplier_cap = jreader.get_scalar<double>("/", "default_multiplier_cap");
     }
 
+    if (jreader.has_member("/", "adjust_multiplier_curve_for_pacing")) {
+        double z = jreader.get_scalar<double>("/", "adjust_multiplier_curve_for_pacing");
+        if (z > 0.01) {
+            if (z > 2.0) {
+                z = 2.0;
+            }
+            _adjust_multiplier_curve_for_pacing = z;
+        }
+    }
+
     if (jreader.has_member("/", "default_nonlba_svr")) {
         _default_nonlba_svr = jreader.get_scalar<double>("/", "default_nonlba_svr");
     }
@@ -149,7 +159,7 @@ double SvrModel::_calc_multiplier(std::string const & adgroup_id, double user_ad
         sigma = std::get<1>(std::get<1>(*it));
     } else {
         sigma = _default_multiplier_curve_sigma;
-        if (pacing < 0.0) {  // No pacing info; use default
+        if (pacing < 0.0 || _adjust_multiplier_curve_for_pacing == 0.0) {  // No pacing info; use default
             mu = _default_multiplier_curve_mu;
         } else {
             if (pacing > 1.0) {
@@ -158,8 +168,9 @@ double SvrModel::_calc_multiplier(std::string const & adgroup_id, double user_ad
                                     pacing
                                 ));
             }
-            mu = pacing * pacing * 2 - 1.;
-            // Square, stretch to [0, 2], shift to [-1, 1].
+            mu = (pacing * pacing * 2 - 1.) * _adjust_multiplier_curve_for_pacing;
+            // Square, stretch to [0, 2], shift to [-1, 1], scale to
+            // [- _adjust_multiplier_curve_for_pacing, _adjust_multiplier_curve_for_pacing]
         }
     }
     return mars::logitnormal_cdf(quantile, mu, sigma);
