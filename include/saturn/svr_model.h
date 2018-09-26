@@ -56,6 +56,7 @@ class SvrModel
     //     ],
     //    "default_nonlba_svr": 0.0001,
     //    "default_lba_svr": 0.001,
+    //    "adjust_multiplier_curve_for_pacing": 0,
     //    "default_multiplier_curve": {"mu": 0.0, "sigma": 0.5},
     //    "default_multiplier_cap": 1.5,
     //    "adgroup_multiplier_curve": [
@@ -176,6 +177,9 @@ class SvrModel
 
     double _default_multiplier_cap = 2.;
     std::map<std::string, double> _adgroup_multiplier_cap;
+
+    double _adjust_multiplier_curve_for_pacing = 0.;
+    // Typically values are 0, 1, 2; recommended value for now is 1.
 
     double _get_default_svr(std::string const & brand_id, int flag) const;
     // flag:
