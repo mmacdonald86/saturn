@@ -7,6 +7,7 @@
 #include "mars/utils.h"
 
 #include <any>
+#include <cassert>
 #include <fstream>
 #include <tuple>
 
@@ -34,11 +35,23 @@ SvrModel::SvrModel(FeatureEngine & feature_engine, std::string path)
     jreader.seek("/", "features");
     _composer_id = f->add_composer(jreader);
 
-    jreader.seek("/", "default_multiplier_curve");
-    _default_multiplier_curve_mu = jreader.get_scalar<double>("mu");
-    _default_multiplier_curve_sigma = jreader.get_scalar<double>("sigma");
+    if (jreader.has_member("/", "default_multiplier_curve")) {
+        jreader.seek("/", "default_multiplier_curve");
+        _default_multiplier_curve_mu = jreader.get_scalar<double>("mu");
+        _default_multiplier_curve_sigma = jreader.get_scalar<double>("sigma");
+    }
 
-    _default_multiplier_cap = jreader.get_scalar<double>("/", "default_multiplier_cap");
+    if (jreader.has_member("/", "default_multiplier_cap")) {
+        _default_multiplier_cap = jreader.get_scalar<double>("/", "default_multiplier_cap");
+    }
+
+    if (jreader.has_member("/", "default_nonlba_svr")) {
+        _default_nonlba_svr = jreader.get_scalar<double>("/", "default_nonlba_svr");
+    }
+
+    if (jreader.has_member("/", "default_lba_svr")) {
+        _default_lba_svr = jreader.get_scalar<double>("/", "default_lba_svr");
+    }
 
     if (jreader.has_member("/", "adgroup_multiplier_curve")) {
         jreader.seek("/", "adgroup_multiplier_curve");
@@ -84,7 +97,7 @@ SvrModel::SvrModel(FeatureEngine & feature_engine, std::string path)
     auto model = mars::CatalogModel::from_avro(areader);
     _mars_model = static_cast<void *>(model.release());
 
-    // Read in default svr file.
+    // Read in brand default svr file. If file does not exist, default values will be used.
     auto infile_svr = std::ifstream(_path + "/brand_default_svr.txt");
     if (infile_svr.is_open()) {
         std::string brand_id;
@@ -93,11 +106,6 @@ SvrModel::SvrModel(FeatureEngine & feature_engine, std::string path)
             _brand_default_svr.emplace(brand_id, std::make_tuple(nonlba_svr, lba_svr));
         }
         infile_svr.close();
-    } else {
-        throw SaturnError(mars::make_string(
-                              "failed to read file `",
-                              _path + "/brand_default_svr.txt",
-                              "`"));
     }
 }
 
@@ -160,25 +168,22 @@ double SvrModel::_calc_multiplier(std::string const & adgroup_id, double user_ad
 
 double SvrModel::_get_default_svr(std::string const & brand_id, int flag) const
 {
-    try {
-        auto val = _brand_default_svr.at(brand_id);
+    assert(flag == 0 || flag == 1);
+
+    auto it = _brand_default_svr.find(brand_id);
+    if (it != _brand_default_svr.end()) {
+        auto [nonlba_svr, lba_svr] = std::get<1>(*it);
         if (flag == 0) {
-            return std::get<0>(val);
-        } else if (flag == 1) {
-            return std::get<1>(val);
+            return nonlba_svr;
         } else {
-            throw SaturnError(mars::make_string(
-                                  "unknown flag value `", flag, "`"
-                              ));
+            return lba_svr;
         }
-    } catch (std::exception& e) {
-        throw SaturnError(mars::make_string(
-                              "failed to get default ",
-                              flag == 0 ? "non-LBA" : "LBA",
-                              " SVR for brand `",
-                              brand_id,
-                              "`; additional error message: ",
-                              e.what()));
+    } else {
+        if (flag == 0) {
+            return _default_nonlba_svr;
+        } else {
+            return _default_lba_svr;
+        }
     }
 }
 

@@ -54,6 +54,8 @@ class SvrModel
     //             "args": {"columns": ["age", "purchase_amount", "domain_name"], "n_predictors": 12}
     //         }
     //     ],
+    //    "default_nonlba_svr": 0.0001,
+    //    "default_lba_svr": 0.001,
     //    "default_multiplier_curve": {"mu": 0.0, "sigma": 0.5},
     //    "default_multiplier_cap": 1.5,
     //    "adgroup_multiplier_curve": [
@@ -159,17 +161,20 @@ class SvrModel
     std::map<std::string, std::tuple<double, double>> _brand_default_svr;
     // Key is brand ID; value is default SVR value for non-LBA traffic and LBA traffic,
     // in that order.
+    double _default_nonlba_svr = 0.0001;
+    double _default_lba_svr = 0.001;
+
     std::map<std::string, std::tuple<double, double>> _adgroup_default_multiplier;
     // Key is adgroupid; value is default multiplier for non-LBA traffic and LBA traffic,
     // in that order.
 
-    double _default_multiplier_curve_mu;
-    double _default_multiplier_curve_sigma;
+    double _default_multiplier_curve_mu = 0.;
+    double _default_multiplier_curve_sigma = 0.5;
     std::map<std::string, std::tuple<double, double>> _adgroup_multiplier_curve;
     // Key is adgroup_id; value is `mu` and `sigma` for function
     // `logitnormal_cdf`.
 
-    double _default_multiplier_cap;
+    double _default_multiplier_cap = 2.;
     std::map<std::string, double> _adgroup_multiplier_cap;
 
     double _get_default_svr(std::string const & brand_id, int flag) const;
