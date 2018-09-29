@@ -4,18 +4,21 @@ LIBS = -lavrocpp -flto
 
 # -flto : link-time optimizations; needs to be passed to both compile and link commands.
 
-TARGETS = libsaturn.so do_svr
+TARGETS = libsaturn.so test_svr run_saturn
 
 all: $(TARGETS)
 
 libsaturn.so: src/feature_engine.cc src/svr_model.cc src/utils.cc
 	$(CC) -std=c++17 $(CCFLAGS) -Iinclude -fPIC -shared $^ $(LIBS) -o $@
 
-do_svr: benchmarks/do_svr.cc
-	$(CC) -std=c++11 $(CCFLAGS) -Iinclude $^ ./libsaturn.so $(LIBS) -o do_svr
+test_svr: tests/test_svr.cc
+	$(CC) -std=c++11 $(CCFLAGS) -Iinclude $^ ./libsaturn.so $(LIBS) -o test_svr
+
+run_saturn: scripts/run_saturn.cc
+	$(CC) -std=c++11 $(CCFLAGS) -Iinclude $^ ./libsaturn.so $(LIBS) -o run_saturn
 
 clean:
 	rm -f *.o
 	rm -f *.so
-	rm -f do_svr
+	rm -f test_svr run_saturn
 
