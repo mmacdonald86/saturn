@@ -1,3 +1,8 @@
+Release 0.5.6
+-------------
+- New utility program 'run_saturn'.
+- SvrModel uses 'has_model' to short-circuit when dynamic quantile curve is not available, to avoid using higher-than-1 multiplier.
+
 Release 0.5.5
 -------------
 - Add more optional elements to 'model_config.json'.
