@@ -59,6 +59,13 @@ class SvrModel
     //    "adjust_multiplier_curve_for_pacing": 0,
     //    "default_multiplier_curve": {"mu": 0.0, "sigma": 0.5},
     //    "default_multiplier_cap": 1.5,
+    //    "adgroup_default_svr": [
+    //         {
+    //            "adgroup_id": "abc",
+    //            "nonlba": 0.1,
+    //            "lba": 0.2
+    //         }
+    //    ],
     //    "adgroup_multiplier_curve": [
     //         {
     //             "adgroup_id": "abc",
@@ -165,6 +172,11 @@ class SvrModel
     double _default_nonlba_svr = 0.0001;
     double _default_lba_svr = 0.001;
 
+    std::map<std::string, std::tuple<double, double>> _adgroup_default_svr;
+    // Key is adgroup ID; value is default SVR value for non-LBA traffic and LBA traffic,
+    // in that order.
+    // This config is mainly used to turn off -1 traffic (by setting the default svr to 0).
+  
     std::map<std::string, std::tuple<double, double>> _adgroup_default_multiplier;
     // Key is adgroupid; value is default multiplier for non-LBA traffic and LBA traffic,
     // in that order.
@@ -181,7 +193,7 @@ class SvrModel
     double _adjust_multiplier_curve_for_pacing = 0.;
     // Typically values are 0, 1, 2; recommended value for now is 1.
 
-    double _get_default_svr(std::string const & brand_id, int flag) const;
+    double _get_default_svr(std::string const & brand_id, std::string const & adgroup_id, int flag) const;
     // flag:
     // if 0, get non-LBA svr;
     // if 1, get LBA svr.

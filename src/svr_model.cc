@@ -63,6 +63,22 @@ SvrModel::SvrModel(FeatureEngine & feature_engine, std::string path)
         _default_lba_svr = jreader.get_scalar<double>("/", "default_lba_svr");
     }
 
+    if (jreader.has_member("/", "adgroup_default_svr")) {
+        jreader.seek("/", "adgroup_default_svr");
+        std::string adgroup_id;
+        double nonlba, lba;
+        auto n = jreader.get_array_size();
+        for (size_t i = 0; i < n; i++) {
+            jreader.save_cursor();
+            jreader.seek_in_array(i);
+            adgroup_id = jreader.get_scalar<std::string>("adgroup_id");
+            nonlba = jreader.get_scalar<double>("nonlba");
+            lba = jreader.get_scalar<double>("lba");
+            _adgroup_default_svr.emplace(adgroup_id, std::make_tuple(nonlba, lba));
+            jreader.restore_cursor();
+        }
+    }
+
     if (jreader.has_member("/", "adgroup_multiplier_curve")) {
         jreader.seek("/", "adgroup_multiplier_curve");
         std::string adgroup_id;
@@ -93,7 +109,6 @@ SvrModel::SvrModel(FeatureEngine & feature_engine, std::string path)
             jreader.restore_cursor();
         }
     }
-
 
     mars::AvroReader areader((_path + "/model_object.data").c_str());
     auto const class_name = areader.get_scalar<std::string>("class_name");
@@ -177,9 +192,19 @@ double SvrModel::_calc_multiplier(std::string const & adgroup_id, double user_ad
 }
 
 
-double SvrModel::_get_default_svr(std::string const & brand_id, int flag) const
+double SvrModel::_get_default_svr(std::string const & brand_id, std::string const & adgroup_id, int flag) const
 {
     assert(flag == 0 || flag == 1);
+
+    auto iit = _adgroup_default_svr.find(adgroup_id);
+    if (iit != _adgroup_default_svr.end()) {
+        auto [nonlba_svr, lba_svr] = std::get<1>(*iit);
+        if (flag == 0) {
+            return nonlba_svr;
+        } else {
+            return lba_svr;
+        }
+    }
 
     auto it = _brand_default_svr.find(brand_id);
     if (it != _brand_default_svr.end()) {
@@ -189,12 +214,12 @@ double SvrModel::_get_default_svr(std::string const & brand_id, int flag) const
         } else {
             return lba_svr;
         }
+    }
+    
+    if (flag == 0) {
+        return _default_nonlba_svr;
     } else {
-        if (flag == 0) {
-            return _default_nonlba_svr;
-        } else {
-            return _default_lba_svr;
-        }
+        return _default_lba_svr;
     }
 }
 
@@ -224,8 +249,19 @@ int SvrModel::run(std::string const & brand_id, std::string const & adgroup_id, 
         _svr = user_adgroup_svr;
         _message = "";
 
-        if (user_adgroup_svr < 0.0) {
-            // Caching default multipliers is because right now
+        if (!this->has_model(adgroup_id)) {
+            if (user_adgroup_svr < 0.0) {
+                _bid_multiplier = 0.;
+            } else {
+                _bid_multiplier = 1.;
+            }
+            return 0;
+        }
+
+        if (user_adgroup_svr < 0.0) {   
+            // '-1' traffic
+            
+            // Caching default multipliers because right now
             // we do not use request-level features.
             // Once we do use request-level features,
             // we'll need to re-calculate the multiplier using
@@ -233,8 +269,11 @@ int SvrModel::run(std::string const & brand_id, std::string const & adgroup_id, 
 
             auto it = _adgroup_default_multiplier.find(adgroup_id);
             if (it == _adgroup_default_multiplier.end()) {
-                double nonlba_svr = this->_get_default_svr(brand_id, 0);
+                double nonlba_svr = this->_get_default_svr(brand_id, adgroup_id, 0);
                 double nonlba_multiplier = this->_calc_multiplier(adgroup_id, nonlba_svr, pacing);
+                // TODO: not quite right here if `pacing` is provided, in which case
+                // this multiplier should be re-calculated every time.
+
                 _adgroup_default_multiplier[adgroup_id] = std::make_tuple(nonlba_multiplier, -1.0);
                 _bid_multiplier = nonlba_multiplier;
             } else {
@@ -247,7 +286,7 @@ int SvrModel::run(std::string const & brand_id, std::string const & adgroup_id, 
                                           "you are not supposed to get here in this testing"
                                       ));
 
-                    double nonlba_svr = this->_get_default_svr(brand_id, 0);
+                    double nonlba_svr = this->_get_default_svr(brand_id, adgroup_id, 0);
                     nonlba_multiplier = this->_calc_multiplier(adgroup_id, nonlba_svr, pacing);
                     _adgroup_default_multiplier[adgroup_id] = std::make_tuple(nonlba_multiplier, lba_multiplier);
                 }
@@ -266,7 +305,6 @@ int SvrModel::run(std::string const & brand_id, std::string const & adgroup_id, 
         return 0;
 
     } catch (std::exception& e) {
-        _svr = 0.;
         _message = e.what();
         _bid_multiplier = 0.;
         return 2;
