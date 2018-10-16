@@ -250,11 +250,12 @@ int SvrModel::run(std::string const & brand_id, std::string const & adgroup_id, 
         _message = "";
 
         if (!this->has_model(adgroup_id)) {
-            if (user_adgroup_svr < 0.0) {
-                _bid_multiplier = 0.;
-            } else {
-                _bid_multiplier = 1.;
-            }
+            // if (user_adgroup_svr < 0.0) {
+            //     _bid_multiplier = 0.;
+            // } else {
+            //     _bid_multiplier = 1.;
+            // }
+            _bid_multiplier = 1.0;
             return 0;
         }
 
@@ -300,7 +301,7 @@ int SvrModel::run(std::string const & brand_id, std::string const & adgroup_id, 
         if (it == _adgroup_multiplier_cap.end()) {
             _bid_multiplier *= _default_multiplier_cap;
         } else {
-            _bid_multiplier *= _adgroup_multiplier_cap[adgroup_id];
+            _bid_multiplier *= std::get<1>(*it);
         }
         return 0;
 
