@@ -19,7 +19,10 @@ class SvrModel
     //
     //            model_object.data
     //            model_config.json
+    //
+    // Optionally, the following files may exist:
     //            brand_default_svr.txt
+    //            adgroup_quantile_cutoff.txt
     //
     // The file `model_object.data` is created by Python code that trains the model.
     // (Specifically, `mars.BaseModel.cc_dump`).
@@ -116,10 +119,19 @@ class SvrModel
     //
     // The file `brand_default_svr.txt` is a plain text file containing three columns on each line:
     //
-    // brand_id non_lba_default_svr lba_default_svr
+    //     brand_id non_lba_default_svr lba_default_svr
     //
     // The file does not contain a header line. The columns are separated by spaces.
-    // This file must contain all the brands that are going to be called on this class object.
+    // This file is optional. If this file or certain brand_id's are missing,
+    // the `default_nonlba_svr` and `default_lba_svr` will take effect.
+    //
+    // The file `adgroup_quantile_cutoff.txt` is a plain text file containing two columns on each line:
+    //
+    //     adgroup_id quantile_cutoff
+    //
+    // Traffic whose quantile falls below the cutoff value (e.g. 0.85) will get multiplier 0,
+    // otherwise 1. This file is to support the 'placed' campaigns.
+    // This file is optional. It contains only adgroups that use the 'placed' bidding strategy.
 
 
     ~SvrModel();
@@ -190,6 +202,8 @@ class SvrModel
     double _default_multiplier_cap = 2.;
     std::map<std::string, double> _adgroup_multiplier_cap;
 
+    std::map<std::string, double> _adgroup_quantile_cutoff;
+    
     double _adjust_multiplier_curve_for_pacing = 0.;
     // Typically values are 0, 1, 2; recommended value for now is 1.
 

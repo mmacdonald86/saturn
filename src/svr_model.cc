@@ -132,6 +132,23 @@ SvrModel::SvrModel(FeatureEngine & feature_engine, std::string path)
         }
         infile_svr.close();
     }
+
+    // Read in `adgroup_quantile_cutoff.txt` file.
+    // If file does not exist, no adgroup is using the 'placed' strategy.
+    auto infile_quant = std::ifstream(_path + "/adgroup_quantile_cutoff.txt");
+    if (infile_quant.is_open()) {
+        std::string adgroup_id;
+        double cutoff;
+        while (infile_quant >> adgroup_id >> cutoff) {
+            if (cutoff < 0.0) {
+                cutoff = 0.0;
+            } else if (cutoff > 1.0) {
+                cutoff = 1.0;
+            }
+            _adgroup_quantile_cutoff.emplace(adgroup_id, cutoff);
+        }
+        infile_quant.close();
+    }
 }
 
 
@@ -166,6 +183,15 @@ double SvrModel::_calc_multiplier(std::string const & adgroup_id, double user_ad
     //
 
     double quantile = std::any_cast<double>(z);
+
+    auto it_q = _adgroup_quantile_cutoff.find(adgroup_id);
+    if (it_q != _adgroup_quantile_cutoff.end()) {
+        double cutoff = std::get<1>(*it_q);
+        if (quantile >= cutoff) {
+            return 1.0;
+        }
+        return 0.0;
+    }
 
     double mu, sigma;
     auto it = _adgroup_multiplier_curve.find(adgroup_id);
@@ -250,15 +276,11 @@ int SvrModel::run(std::string const & brand_id, std::string const & adgroup_id, 
         _message = "";
 
         if (!this->has_model(adgroup_id)) {
-            if (user_adgroup_svr < 0.0) {
-                _bid_multiplier = 0.;
-            } else {
-                _bid_multiplier = 1.;
-            }
+            _bid_multiplier = 1.0;
             return 0;
         }
 
-        if (user_adgroup_svr < 0.0) {   
+        if (user_adgroup_svr < 0.0) {
             // '-1' traffic
             
             // Caching default multipliers because right now
@@ -300,7 +322,7 @@ int SvrModel::run(std::string const & brand_id, std::string const & adgroup_id, 
         if (it == _adgroup_multiplier_cap.end()) {
             _bid_multiplier *= _default_multiplier_cap;
         } else {
-            _bid_multiplier *= _adgroup_multiplier_cap[adgroup_id];
+            _bid_multiplier *= std::get<1>(*it);
         }
         return 0;
 
