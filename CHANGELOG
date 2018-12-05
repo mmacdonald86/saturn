@@ -1,3 +1,8 @@
+Release 0.5.7
+-------------
+- Support hard quantile cutoff in SvrModel.
+- Other minor changes.
+
 Release 0.5.6
 -------------
 - New utility program 'run_saturn'.
