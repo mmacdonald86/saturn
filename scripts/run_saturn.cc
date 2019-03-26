@@ -55,6 +55,60 @@ int run(saturn::SvrModel * svr_model, int argc, char const * const * argv)
     return 0;
 }
 
+int get_multiplier(saturn::SvrModel * svr_model, int argc, char const * const * argv)
+{
+    if (argc < 6) {
+        return 1;
+    }
+
+    std::string brand_id = std::string(argv[3]);
+    std::string adgroup_id = std::string(argv[4]);
+    double user_svr = std::stod(argv[5]);
+
+    std::cout << "brand ID:        " << brand_id << std::endl;
+    std::cout << "adgroup ID:      " << adgroup_id << std::endl;
+    std::cout << "predicted SVR:   " << user_svr << std::endl;
+    std::cout << std::endl;
+
+    if (svr_model->run(brand_id, adgroup_id, user_svr) == 0) {
+        std::cout << "model output" << std::endl;
+        std::cout << "svr:             " << svr_model->svr() << std::endl;
+        std::cout << "multiplier:      " << svr_model->bid_multiplier() << std::endl;
+    } else {
+        std::cout << "ERROR!" << std::endl;
+        std::cout << svr_model->message() << std::endl;
+    }
+
+    return 0;
+}
+
+int get_cpsvr(saturn::SvrModel * svr_model, int argc, char const * const * argv)
+{
+    if (argc < 6) {
+        return 1;
+    }
+
+    std::string brand_id = std::string(argv[3]);
+    std::string adgroup_id = std::string(argv[4]);
+    double user_svr = std::stod(argv[5]);
+
+    std::cout << "brand ID:        " << brand_id << std::endl;
+    std::cout << "adgroup ID:      " << adgroup_id << std::endl;
+    std::cout << "predicted SVR:   " << user_svr << std::endl;
+    std::cout << std::endl;
+
+    if (svr_model->run(brand_id, adgroup_id, user_svr) == 0) {
+        std::cout << "model output" << std::endl;
+        std::cout << "svr:             " << svr_model->svr() << std::endl;
+        std::cout << "calibrated psvr:      " << svr_model->bid_multiplier() << std::endl;
+    } else {
+        std::cout << "ERROR!" << std::endl;
+        std::cout << svr_model->message() << std::endl;
+    }
+
+    return 0;
+}
+
 
 int main(int argc, char const * const * argv)
 {
@@ -79,6 +133,10 @@ int main(int argc, char const * const * argv)
             exit_code = run(svr_model, argc, argv);
         } else if (command == "has_model") {
             exit_code = has_model(svr_model, argc, argv);
+        } else if (command == "get_multiplier") {
+            exit_code = get_multiplier(svr_model, argc, argv);
+        } else if (command == "get_cpsvr") {
+            exit_code = get_cpsvr(svr_model, argc, argv);
         } else {
             exit_code = 1;
         }

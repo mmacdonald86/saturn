@@ -257,6 +257,18 @@ bool SvrModel::has_model(std::string const & adgroup_id) const
 }
 
 
+int SvrModel::get_multiplier(std::string const & brand_id, std::string const & adgroup_id, double user_adgroup_svr)
+{
+    return this->run(brand_id, adgroup_id, user_adgroup_svr);
+}
+
+
+int SvrModel::get_cpsvr(std::string const & brand_id, std::string const & adgroup_id, double user_adgroup_svr)
+{
+    return this->run(brand_id, adgroup_id, user_adgroup_svr);
+}
+
+
 int SvrModel::run(std::string const & brand_id, std::string const & adgroup_id, double user_adgroup_svr, double pacing)
 {
     // When `user_adgroup_svr` is -1, this function provides a brand-aware

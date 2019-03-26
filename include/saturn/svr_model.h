@@ -141,6 +141,10 @@ class SvrModel
     bool has_model(std::string const & adgroup_id) const;
 
     int run(std::string const & brand_id, std::string const & adgroup_id, double user_adgroup_svr, double pacing = -1.);
+
+    int get_multiplier(std::string const & brand_id, std::string const & adgroup_id, double user_adgroup_svr);
+
+    int get_cpsvr(std::string const & brand_id, std::string const & adgroup_id, double user_adgroup_svr);
     // 0 is success; usually no need to check `message()`.
     // Other values indicate problems; check `message()`.
     //
