@@ -256,16 +256,31 @@ bool SvrModel::has_model(std::string const & adgroup_id) const
     return m->has_model(adgroup_id);
 }
 
+enum class Mode{brand, location_group};
 
-int SvrModel::get_multiplier(std::string const & brand_id, std::string const & adgroup_id, double user_adgroup_svr)
+int SvrModel::get_multiplier(std::string const & id, std::string const & adgroup_id, double user_adgroup_svr,
+                             Mode mode)
 {
-    return this->run(brand_id, adgroup_id, user_adgroup_svr);
+    switch(mode) {
+        case SvrModel::Mode::brand: return this->run(id, adgroup_id, user_adgroup_svr); break;
+        case SvrModel::Mode::location_group:
+            std::string location_group_id = id + "lg";
+            return this->run(location_group_id, adgroup_id, user_adgroup_svr); break;
+    }
+    return 1;
 }
 
 
-int SvrModel::get_cpsvr(std::string const & brand_id, std::string const & adgroup_id, double user_adgroup_svr)
+int SvrModel::get_cpsvr(std::string const & id, std::string const & adgroup_id, double user_adgroup_svr,
+                        Mode mode)
 {
-    return this->run(brand_id, adgroup_id, user_adgroup_svr);
+    switch(mode) {
+        case SvrModel::Mode::brand: return this->run(id, adgroup_id, user_adgroup_svr); break;
+        case SvrModel::Mode::location_group:
+            std::string location_group_id = id + "lg";
+            return this->run(location_group_id, adgroup_id, user_adgroup_svr); break;
+    }
+    return 1;
 }
 
 

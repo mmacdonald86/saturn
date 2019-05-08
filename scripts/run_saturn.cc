@@ -55,22 +55,31 @@ int run(saturn::SvrModel * svr_model, int argc, char const * const * argv)
     return 0;
 }
 
+//enum Mode{brand, location_group};
+
 int get_multiplier(saturn::SvrModel * svr_model, int argc, char const * const * argv)
 {
-    if (argc < 6) {
+    if (argc < 7) {
         return 1;
     }
 
     std::string brand_id = std::string(argv[3]);
     std::string adgroup_id = std::string(argv[4]);
     double user_svr = std::stod(argv[5]);
+    std::string mode_str = std::string(argv[6]);
+    saturn::SvrModel::Mode mode;
+    if (mode_str == "brand"){
+        mode = saturn::SvrModel::Mode::brand;
+    } else {
+        mode = saturn::SvrModel::Mode::location_group;
+    }
 
     std::cout << "brand ID:        " << brand_id << std::endl;
     std::cout << "adgroup ID:      " << adgroup_id << std::endl;
     std::cout << "predicted SVR:   " << user_svr << std::endl;
     std::cout << std::endl;
 
-    if (svr_model->run(brand_id, adgroup_id, user_svr) == 0) {
+    if (svr_model->get_multiplier(brand_id, adgroup_id, user_svr, mode) == 0) {
         std::cout << "model output" << std::endl;
         std::cout << "svr:             " << svr_model->svr() << std::endl;
         std::cout << "multiplier:      " << svr_model->bid_multiplier() << std::endl;
@@ -84,20 +93,27 @@ int get_multiplier(saturn::SvrModel * svr_model, int argc, char const * const * 
 
 int get_cpsvr(saturn::SvrModel * svr_model, int argc, char const * const * argv)
 {
-    if (argc < 6) {
+    if (argc < 7) {
         return 1;
     }
 
     std::string brand_id = std::string(argv[3]);
     std::string adgroup_id = std::string(argv[4]);
     double user_svr = std::stod(argv[5]);
+    std::string mode_str = std::string(argv[6]);
+    saturn::SvrModel::Mode mode;
+    if (mode_str == "brand"){
+        mode = saturn::SvrModel::Mode::brand;
+    } else {
+        mode = saturn::SvrModel::Mode::location_group;
+    }
 
     std::cout << "brand ID:        " << brand_id << std::endl;
     std::cout << "adgroup ID:      " << adgroup_id << std::endl;
     std::cout << "predicted SVR:   " << user_svr << std::endl;
     std::cout << std::endl;
 
-    if (svr_model->run(brand_id, adgroup_id, user_svr) == 0) {
+    if (svr_model->get_cpsvr(brand_id, adgroup_id, user_svr, mode) == 0) {
         std::cout << "model output" << std::endl;
         std::cout << "svr:             " << svr_model->svr() << std::endl;
         std::cout << "calibrated psvr:      " << svr_model->bid_multiplier() << std::endl;
