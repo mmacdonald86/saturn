@@ -274,6 +274,11 @@ int SvrModel::get_multiplier(std::string const & id, std::string const & adgroup
 int SvrModel::get_cpsvr(std::string const & id, std::string const & adgroup_id, double user_adgroup_svr,
                         Mode mode)
 {
+    if (!this->has_model(adgroup_id)) {
+        _svr = user_adgroup_svr;
+        _bid_multiplier = user_adgroup_svr;
+        return 0;
+    }
     switch(mode) {
         case SvrModel::Mode::brand: return this->run(id, adgroup_id, user_adgroup_svr); break;
         case SvrModel::Mode::location_group:
