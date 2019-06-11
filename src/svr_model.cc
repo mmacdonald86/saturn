@@ -253,7 +253,7 @@ double SvrModel::_get_default_svr(std::string const & brand_id, std::string cons
 bool SvrModel::has_model(std::string const & adgroup_id) const
 {
     auto m = static_cast<mars::CatalogModel *>(_mars_model);
-    return m->has_model(adgroup_id);
+    return m->has_model(adgroup_id.substr(1));
 }
 
 enum class Mode{brand, location_group};
@@ -271,19 +271,28 @@ int SvrModel::get_multiplier(std::string const & id, std::string const & adgroup
 }
 
 
-int SvrModel::get_cpsvr(std::string const & id, std::string const & adgroup_id, double user_adgroup_svr,
-                        Mode mode)
+int SvrModel::get_cpsvr(std::string const & id, std::string const & adgroup_id, double user_adgroup_svr, Mode mode)
 {
-    if (!this->has_model(adgroup_id)) {
+    std::string keys = "";
+    switch(mode) {
+        case SvrModel::Mode::brand:
+            keys = "/" + adgroup_id + "/b_" + id; break;
+        case SvrModel::Mode::location_group:
+            keys = "/" + adgroup_id + "/t_" + id; break;
+    }
+
+    if (!this->has_model(keys)) {
         _svr = user_adgroup_svr;
         _bid_multiplier = user_adgroup_svr;
         return 0;
     }
-    switch(mode) {
-        case SvrModel::Mode::brand: return this->run(id, adgroup_id, user_adgroup_svr); break;
-        case SvrModel::Mode::location_group:
-            std::string location_group_id = id + "lg";
-            return this->run(location_group_id, adgroup_id, user_adgroup_svr); break;
+    else {
+        auto m = static_cast<mars::CatalogModel *>(_mars_model);
+        std::vector<double> x(1);
+        x[0] = user_adgroup_svr;
+        _bid_multiplier = std::any_cast<double>(m->run(x, keys.substr(1)));
+        _svr = user_adgroup_svr;
+        return 0;
     }
     return 1;
 }
