@@ -262,11 +262,47 @@ enum class Mode{brand, location_group};
 int SvrModel::get_multiplier(std::string const & id, std::string const & adgroup_id, double user_adgroup_svr,
                              Mode mode)
 {
+//    switch(mode) {
+//        case SvrModel::Mode::brand: return this->run(id, adgroup_id, user_adgroup_svr); break;
+//        case SvrModel::Mode::location_group:
+//            std::string location_group_id = id + "lg";
+//            return this->run(location_group_id, adgroup_id, user_adgroup_svr); break;
+//    }
+//    return 1;
+
+    std::string keys = "";
     switch(mode) {
-        case SvrModel::Mode::brand: return this->run(id, adgroup_id, user_adgroup_svr); break;
+        case SvrModel::Mode::brand:
+            keys = "/" + adgroup_id + "/b_" + id; break;
         case SvrModel::Mode::location_group:
-            std::string location_group_id = id + "lg";
-            return this->run(location_group_id, adgroup_id, user_adgroup_svr); break;
+            keys = "/" + adgroup_id + "/t_" + id; break;
+    }
+
+    if (!this->has_model(keys)) {
+        _svr = user_adgroup_svr;
+        _bid_multiplier = 1.0;
+        return 0;
+    }
+    else {
+        auto m = static_cast<mars::CatalogModel *>(_mars_model);
+        std::vector<double> x(1);
+        x[0] = user_adgroup_svr;
+        double percent = std::any_cast<double>(m->run(x, keys.substr(1)));
+
+        auto it_q = _adgroup_quantile_cutoff.find(adgroup_id);
+        if (it_q != _adgroup_quantile_cutoff.end()) {
+            double cutoff = std::get<1>(*it_q);
+            if (percent >= cutoff) {
+                _bid_multiplier = 1.0;
+            } else {
+                _bid_multiplier = 0.0;
+            }
+        } else {
+            _bid_multiplier = percent;
+        }
+
+        _svr = user_adgroup_svr;
+        return 0;
     }
     return 1;
 }
