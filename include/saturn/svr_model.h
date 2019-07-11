@@ -170,6 +170,7 @@ class SvrModel
     // The following methods provide results after a call to `run`.
     double svr() const;
     double bid_multiplier() const;
+    double cpsvr() const;
     std::string const & message() const;
 
   private:
@@ -182,6 +183,7 @@ class SvrModel
 
     double _svr = 0.;
     double _bid_multiplier = 0.;
+    double _cpsvr = 0.;
     std::string _message = "";
 
     double _calc_multiplier(std::string const & adgroup_id, double user_adgroup_svr, double pacing);

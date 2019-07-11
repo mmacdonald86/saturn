@@ -116,7 +116,7 @@ int get_cpsvr(saturn::SvrModel * svr_model, int argc, char const * const * argv)
     if (svr_model->get_cpsvr(brand_id, adgroup_id, user_svr, mode) == 0) {
         std::cout << "model output" << std::endl;
         std::cout << "svr:             " << svr_model->svr() << std::endl;
-        std::cout << "calibrated psvr:      " << svr_model->bid_multiplier() << std::endl;
+        std::cout << "calibrated psvr:      " << svr_model->cpsvr() << std::endl;
     } else {
         std::cout << "ERROR!" << std::endl;
         std::cout << svr_model->message() << std::endl;

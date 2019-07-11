@@ -262,28 +262,27 @@ enum class Mode{brand, location_group};
 int SvrModel::get_multiplier(std::string const & id, std::string const & adgroup_id, double user_adgroup_svr,
                              Mode mode)
 {
-//    switch(mode) {
-//        case SvrModel::Mode::brand: return this->run(id, adgroup_id, user_adgroup_svr); break;
-//        case SvrModel::Mode::location_group:
-//            std::string location_group_id = id + "lg";
-//            return this->run(location_group_id, adgroup_id, user_adgroup_svr); break;
-//    }
-//    return 1;
+    try {
+        if (user_adgroup_svr < 0.) {
+            _svr = user_adgroup_svr;
+            _bid_multiplier = 0.;
+            return 0;
+        }
 
-    std::string keys = "";
-    switch(mode) {
-        case SvrModel::Mode::brand:
-            keys = "/" + adgroup_id + "/b_" + id; break;
-        case SvrModel::Mode::location_group:
-            keys = "/" + adgroup_id + "/t_" + id; break;
-    }
+        std::string keys = "";
+        switch(mode) {
+            case SvrModel::Mode::brand:
+                keys = "/" + adgroup_id + "/b_" + id; break;
+            case SvrModel::Mode::location_group:
+                keys = "/" + adgroup_id + "/t_" + id; break;
+        }
 
-    if (!this->has_model(keys)) {
-        _svr = user_adgroup_svr;
-        _bid_multiplier = 1.0;
-        return 0;
-    }
-    else {
+        if (!this->has_model(keys)) {
+            _svr = user_adgroup_svr;
+            _bid_multiplier = 0.;
+            return 0;
+        }
+
         auto m = static_cast<mars::CatalogModel *>(_mars_model);
         std::vector<double> x(1);
         x[0] = user_adgroup_svr;
@@ -293,9 +292,9 @@ int SvrModel::get_multiplier(std::string const & id, std::string const & adgroup
         if (it_q != _adgroup_quantile_cutoff.end()) {
             double cutoff = std::get<1>(*it_q);
             if (percent >= cutoff) {
-                _bid_multiplier = 1.0;
+                _bid_multiplier = 1.;
             } else {
-                _bid_multiplier = 0.0;
+                _bid_multiplier = 0.;
             }
         } else {
             _bid_multiplier = percent;
@@ -303,35 +302,53 @@ int SvrModel::get_multiplier(std::string const & id, std::string const & adgroup
 
         _svr = user_adgroup_svr;
         return 0;
+
+    } catch (std::exception& e) {
+        _message = e.what();
+        _bid_multiplier = 0.;
+        return 2;
     }
-    return 1;
 }
 
 
 int SvrModel::get_cpsvr(std::string const & id, std::string const & adgroup_id, double user_adgroup_svr, Mode mode)
 {
-    std::string keys = "";
-    switch(mode) {
-        case SvrModel::Mode::brand:
-            keys = "/" + adgroup_id + "/b_" + id; break;
-        case SvrModel::Mode::location_group:
-            keys = "/" + adgroup_id + "/t_" + id; break;
-    }
+    try {
+        if (user_adgroup_svr < 0.) {
+            _cpsvr = 0.;
+            _bid_multiplier = 0.;
+            _svr = user_adgroup_svr;
+            return 0;
+        }
+        std::string keys = "";
+        switch(mode) {
+            case SvrModel::Mode::brand:
+                keys = "/" + adgroup_id + "/b_" + id; break;
+            case SvrModel::Mode::location_group:
+                keys = "/" + adgroup_id + "/t_" + id; break;
+        }
+        if (!this->has_model(keys)) {
+            _svr = user_adgroup_svr;
+            _cpsvr = user_adgroup_svr;
+            _bid_multiplier = user_adgroup_svr;
+            return 0;
+        }
 
-    if (!this->has_model(keys)) {
-        _svr = user_adgroup_svr;
-        _bid_multiplier = user_adgroup_svr;
-        return 0;
-    }
-    else {
         auto m = static_cast<mars::CatalogModel *>(_mars_model);
         std::vector<double> x(1);
         x[0] = user_adgroup_svr;
-        _bid_multiplier = std::any_cast<double>(m->run(x, keys.substr(1)));
+        _cpsvr = std::any_cast<double>(m->run(x, keys.substr(1)));
+        _bid_multiplier = _cpsvr;
         _svr = user_adgroup_svr;
         return 0;
+
+    } catch (std::exception& e) {
+        _message = e.what();
+        _cpsvr = 0.;
+        _bid_multiplier = 0.;
+        return 2;
     }
-    return 1;
+
 }
 
 
@@ -419,6 +436,11 @@ double SvrModel::svr() const
 double SvrModel::bid_multiplier() const
 {
     return _bid_multiplier;
+}
+
+double SvrModel::cpsvr() const
+{
+    return _cpsvr;
 }
 
 std::string const & SvrModel::message() const
