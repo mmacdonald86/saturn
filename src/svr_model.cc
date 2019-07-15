@@ -317,7 +317,7 @@ int SvrModel::get_cpsvr(std::string const & id, std::string const & adgroup_id, 
         if (user_adgroup_svr < 0.) {
             _cpsvr = 0.;
             _bid_multiplier = 0.;
-            _svr = user_adgroup_svr;
+            _svr = 0;
             return 0;
         }
         std::string keys = "";
