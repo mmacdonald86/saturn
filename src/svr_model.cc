@@ -279,7 +279,7 @@ int SvrModel::get_multiplier(std::string const & id, std::string const & adgroup
 
         if (!this->has_model(keys)) {
             _svr = user_adgroup_svr;
-            _bid_multiplier = 0.;
+            _bid_multiplier = -2.;
             return 0;
         }
 
