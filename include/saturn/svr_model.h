@@ -6,6 +6,7 @@
 
 #include <map>
 #include <tuple>
+#include <set>
 
 
 namespace saturn
@@ -138,7 +139,9 @@ class SvrModel
 
     std::string const & model_id() const;
 
-    bool has_model(std::string const & adgroup_id) const;
+    bool has_model(std::string const & key) const;
+
+    bool has_adgroup(std::string const & adgroup_id) const;
 
     int run(std::string const & brand_id, std::string const & adgroup_id, double user_adgroup_svr, double pacing = -1.);
 
@@ -181,6 +184,7 @@ class SvrModel
     std::string _model_id;
     std::string _composer_id;
 
+
     double _svr = 0.;
     double _bid_multiplier = 0.;
     double _cpsvr = 0.;
@@ -213,6 +217,7 @@ class SvrModel
     std::map<std::string, double> _adgroup_multiplier_cap;
 
     std::map<std::string, double> _adgroup_quantile_cutoff;
+    std::set<std::string> _adgroup_set;
     
     double _adjust_multiplier_curve_for_pacing = 0.;
     // Typically values are 0, 1, 2; recommended value for now is 1.

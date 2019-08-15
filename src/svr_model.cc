@@ -120,6 +120,27 @@ SvrModel::SvrModel(FeatureEngine & feature_engine, std::string path)
                               "`"));
     }
 
+
+    auto n_models = areader.get_array_size("models");
+    areader.save_cursor();
+    areader.seek("models");
+    for (size_t i = 0; i < n_models; i++) {
+            areader.save_cursor();
+            areader.seek_in_array(i);
+            auto key = areader.get_scalar<std::string>("key").substr(1);
+
+            areader.restore_cursor();
+//            std::cout<<"adgroup: " << key.substr(0, key.find("/")) << std::endl;
+            _adgroup_set.insert(key.substr(0, key.find("/")));
+    }
+    areader.restore_cursor();
+
+
+//	if(_adgroup_set.count("90678665")) {
+//	    std::cout << "found" << '\n';
+//	}
+
+
     auto model = mars::CatalogModel::from_avro(areader);
     _mars_model = static_cast<void *>(model.release());
 
@@ -171,17 +192,6 @@ double SvrModel::_calc_multiplier(std::string const & adgroup_id, double user_ad
     std::string const & tag = adgroup_id;
 
     auto z = m->run(x, tag);
-
-    // Version 0:
-    //   CatalogModel contains ChainModel's.
-    //
-    // auto zz = std::any_cast<mars::ChainModel::result_type>(z);
-    // _bid_multiplier = std::any_cast<double>(std::get<0>(zz));
-    // _svr = std::get<1>(zz)[0][0];
-
-    // Version 1:
-    //   CatalogModel contains IsotonicRegression or IsotonicLinearInterpolation.
-    //
 
     double quantile = std::any_cast<double>(z);
 
@@ -251,11 +261,18 @@ double SvrModel::_get_default_svr(std::string const & brand_id, std::string cons
 }
 
 
-bool SvrModel::has_model(std::string const & adgroup_id) const
+bool SvrModel::has_model(std::string const & key) const
 {
     auto m = static_cast<mars::CatalogModel *>(_mars_model);
-    return m->has_model(adgroup_id.substr(1));
+    return m->has_model(key.substr(1));
 }
+
+
+bool SvrModel::has_adgroup(std::string const & adgroup_id) const
+{
+    return _adgroup_set.count(adgroup_id);
+}
+
 
 enum class Mode{brand, location_group};
 
@@ -265,7 +282,13 @@ int SvrModel::get_multiplier(std::string const & id, std::string const & adgroup
     try {
         if (user_adgroup_svr < 0.) {
             _svr = user_adgroup_svr;
-            _bid_multiplier = 0.;
+            _bid_multiplier = 0;
+            return 0;
+        }
+
+        if (!has_adgroup(adgroup_id)) {
+            _svr = user_adgroup_svr;
+            _bid_multiplier = -2;
             return 0;
         }
 
@@ -279,7 +302,7 @@ int SvrModel::get_multiplier(std::string const & id, std::string const & adgroup
 
         if (!this->has_model(keys)) {
             _svr = user_adgroup_svr;
-            _bid_multiplier = -2.;
+            _bid_multiplier = 0;
             return 0;
         }
 
