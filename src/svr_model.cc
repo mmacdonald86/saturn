@@ -282,7 +282,8 @@ int SvrModel::get_multiplier(std::string const & id, std::string const & adgroup
     try {
         if (user_adgroup_svr < 0.) {
             _svr = user_adgroup_svr;
-            _bid_multiplier = 0;
+//            _bid_multiplier = 0;
+            _bid_multiplier = 1;    // tmp
             return 0;
         }
 
