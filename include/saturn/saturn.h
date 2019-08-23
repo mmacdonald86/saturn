@@ -7,5 +7,7 @@
 #include "common.h"
 #include "feature_engine.h"
 #include "svr_model.h"
+#include "wr_model.h"
+#include "ctr_model.h"
 
 #endif
