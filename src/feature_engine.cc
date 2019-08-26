@@ -17,6 +17,28 @@ const std::vector<std::string> FeatureEngine::STRING_FIELDS({
     "state",
     "zipcode",
     "os",
+    "ctr_campaign_id",
+    "ctr_adgroup_id",
+    "ctr_creative_id",
+    "ctr_publisher_id",
+    "ctr_traffic_name",
+    "ctr_age",
+    "ctr_gender",
+    "ctr_banner_size",
+    "ctr_os",
+    "ctr_carrier",
+    "ctr_pub_type",
+    "ctr_device_type",
+    "ctr_creative_type",
+    "ctr_adomain",
+    "ctr_uid_type",
+    "ctr_device_make",
+    "ctr_device_model",
+    "ctr_device_year",
+    "ctr_isp",
+    "ctr_hour",
+    "ctr_sic",
+    "ctr_dt",
 });
 
 
@@ -25,6 +47,7 @@ const std::vector<std::string> FeatureEngine::INT_FIELDS({
     "age",
     "sl_adjusted_confidence",
     "device_year",
+    "ctr_sl_adjusted_confidence",
 });
 
 
