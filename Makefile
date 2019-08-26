@@ -10,22 +10,22 @@ TARGETS = libsaturn.so latency run_ctr run_saturn test_svr
 all: $(TARGETS)
 
 libsaturn.so: src/feature_engine.cc src/ctr_model.cc src/svr_model.cc src/utils.cc
-        $(CC) -std=c++17 $(CCFLAGS) -Iinclude -fPIC -shared $^ $(LIBS) -o $@
+	$(CC) -std=c++17 $(CCFLAGS) -Iinclude -fPIC -shared $^ $(LIBS) -o $@
 
 latency: tests/latency.cc
-        $(CC) -std=c++17 $(CCFLAGS) -Iinclude $^ ./libsaturn.so $(LIBS) -o latency
+	$(CC) -std=c++17 $(CCFLAGS) -Iinclude $^ ./libsaturn.so $(LIBS) -o latency
 
 run_ctr: scripts/run_ctr.cc
-        $(CC) -std=c++11 $(CCFLAGS) -Iinclude $^ ./libsaturn.so $(LIBS) -o run_ctr
+	$(CC) -std=c++11 $(CCFLAGS) -Iinclude $^ ./libsaturn.so $(LIBS) -o run_ctr
 
 test_svr: tests/test_svr.cc
-        $(CC) -std=c++11 $(CCFLAGS) -Iinclude $^ ./libsaturn.so $(LIBS) -o test_svr
+	$(CC) -std=c++11 $(CCFLAGS) -Iinclude $^ ./libsaturn.so $(LIBS) -o test_svr
 
 run_saturn: scripts/run_saturn.cc
-        $(CC) -std=c++11 $(CCFLAGS) -Iinclude $^ ./libsaturn.so $(LIBS) -o run_saturn
+	$(CC) -std=c++11 $(CCFLAGS) -Iinclude $^ ./libsaturn.so $(LIBS) -o run_saturn
 
 clean:
-        rm -f *.o
-        rm -f *.so
-        rm -f test_svr latency run_ctr run_saturn
+	rm -f *.o
+	rm -f *.so
+	rm -f test_svr latency run_ctr run_saturn
 
