@@ -2,3 +2,5 @@
 **/*.so
 .vscode/
 do_svr
+idea/
+tests/data/
