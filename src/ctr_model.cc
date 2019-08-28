@@ -63,28 +63,22 @@ double ctrModel::get_prob(std::vector<std::string> input)
 {
 
     _feature_engine.update_field(FeatureEngine::StringField::ctr_campaign_id, input[0]);
-    _feature_engine.update_field(FeatureEngine::StringField::ctr_adgroup_id, input[1]);
-    _feature_engine.update_field(FeatureEngine::StringField::ctr_creative_id, input[2]);
-    _feature_engine.update_field(FeatureEngine::StringField::ctr_creative_type, input[3]);
-    _feature_engine.update_field(FeatureEngine::StringField::ctr_adomain, input[4]);
-    _feature_engine.update_field(FeatureEngine::StringField::ctr_sic, input[5]);
-    _feature_engine.update_field(FeatureEngine::StringField::ctr_gender, input[6]);
-    _feature_engine.update_field(FeatureEngine::StringField::ctr_banner_size, input[7]);
-    _feature_engine.update_field(FeatureEngine::StringField::ctr_os, input[8]);
-    _feature_engine.update_field(FeatureEngine::StringField::ctr_carrier, input[9]);
-    _feature_engine.update_field(FeatureEngine::StringField::ctr_pub_type, input[10]);
-    _feature_engine.update_field(FeatureEngine::StringField::ctr_device_type, input[11]);
-    _feature_engine.update_field(FeatureEngine::StringField::ctr_publisher_id, input[12]);
-    _feature_engine.update_field(FeatureEngine::StringField::ctr_traffic_name, input[13]);
-    _feature_engine.update_field(FeatureEngine::StringField::ctr_uid_type, input[14]);
-    _feature_engine.update_field(FeatureEngine::StringField::ctr_device_make, input[15]);
-    _feature_engine.update_field(FeatureEngine::StringField::ctr_device_model, input[16]);
-    _feature_engine.update_field(FeatureEngine::StringField::ctr_device_year, input[17]);
-    _feature_engine.update_field(FeatureEngine::StringField::ctr_isp, input[18]);
-    _feature_engine.update_field(FeatureEngine::StringField::ctr_hour, input[19]);
-    _feature_engine.update_field(FeatureEngine::StringField::ctr_age, input[20]);
-    _feature_engine.update_field(FeatureEngine::StringField::ctr_dt, input[21]);
-    _feature_engine.update_field(FeatureEngine::IntField::ctr_sl_adjusted_confidence, std::stoi(input[22]));
+    _feature_engine.update_field(FeatureEngine::StringField::ctr_creative_id, input[1]);
+    _feature_engine.update_field(FeatureEngine::StringField::ctr_creative_type, input[2]);
+    _feature_engine.update_field(FeatureEngine::StringField::ctr_adomain, input[3]);
+    _feature_engine.update_field(FeatureEngine::StringField::ctr_sic, input[4]);
+    _feature_engine.update_field(FeatureEngine::StringField::ctr_gender, input[5]);
+    _feature_engine.update_field(FeatureEngine::StringField::ctr_banner_size, input[6]);
+    _feature_engine.update_field(FeatureEngine::StringField::ctr_carrier, input[7]);
+    _feature_engine.update_field(FeatureEngine::StringField::ctr_device_type, input[8]);
+    _feature_engine.update_field(FeatureEngine::StringField::ctr_publisher_id, input[9]);
+    _feature_engine.update_field(FeatureEngine::StringField::ctr_traffic_name, input[10]);
+    _feature_engine.update_field(FeatureEngine::StringField::ctr_uid_type, input[11]);
+    _feature_engine.update_field(FeatureEngine::StringField::ctr_device_model, input[12]);
+    _feature_engine.update_field(FeatureEngine::StringField::ctr_isp, input[13]);
+    _feature_engine.update_field(FeatureEngine::StringField::ctr_hour, input[14]);
+    _feature_engine.update_field(FeatureEngine::StringField::ctr_age, input[15]);
+    _feature_engine.update_field(FeatureEngine::IntField::ctr_sl_adjusted_confidence, std::stoi(input[16]));
 
     auto f = static_cast<mars::FeatureEngine *>(_feature_engine._mars_feature_engine);
     auto x = f->render(_composer_id);
