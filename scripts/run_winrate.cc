@@ -13,23 +13,22 @@ const std::string USAGE =
 
 int run(saturn::WrModel * wr_model, int argc, char const * const * argv)
 {
-    if (argc < 6) {
-        return 1;
-    }
-    std::vector<std::string> input;
-    input.push_back(std::string(argv[3]));
-    input.push_back(std::string(argv[4]));
-    input.push_back(std::string(argv[5]));
 
-    std::cout << "Input Features:   " << std::endl;
-    for (auto i = input.begin(); i != input.end(); ++i){
-        std::cout << *i << ' ';
+    std::vector<std::string> input;
+    for (int i = 2; i < argc; i++){
+        input.push_back(std::string(argv[i]));
+//   std::cout << "input" << argv[i]<< std::endl;
     }
-    std::cout << std::endl;
+
+//    std::cout << "Input Features:   " << std::endl;
+//    for (auto i = input.begin(); i != input.end(); ++i){
+//        std::cout << *i << ' ';
+//    }
+//    std::cout << std::endl;
 
     if (wr_model->get_prob(input) == 0) {
         std::cout << "model output" << std::endl;
-        std::cout << "prob:             " << wr_model->prob() << std::endl;
+        std::cout << "prob:             " << wr_model->final_prob() << std::endl;
     } else {
         std::cout << "ERROR!" << std::endl;
         std::cout << wr_model->message() << std::endl;
@@ -53,17 +52,10 @@ int main(int argc, char const * const * argv)
         }
         std::cout << "model file path: " << modelpath << std::endl;
 
-        std::string command = std::string(argv[2]);
-
         auto feature_engine = saturn::FeatureEngine();
         auto wr_model = new saturn::WrModel(feature_engine, modelpath);
 
-        if (command == "run") {
-            exit_code = run(wr_model, argc, argv);
-        } else {
-            exit_code = 1;
-        }
-
+        exit_code = run(wr_model, argc, argv);
         delete wr_model;
     }
 

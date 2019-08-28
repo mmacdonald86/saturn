@@ -67,6 +67,17 @@ class FeatureEngine
         ctr_hour,
         ctr_sic,
         ctr_dt,
+        wr_Uidtype,
+        wr_Devicetype,
+        wr_Os,
+        wr_Devicemake,
+        wr_Bundle,
+        wr_Bannersize,
+        wr_Spusergender,
+        wr_Pubbidrate,
+        wr_Isp,
+        wr_Adomain,
+        wr_Devicemodel,
     };
 
     static const std::vector<std::string> INT_FIELDS;
@@ -77,6 +88,9 @@ class FeatureEngine
         kSconf,
         kDeviceYear,
         ctr_sl_adjusted_confidence,
+        wr_Hour,
+        wr_Sladjustedconfidence,
+        wr_Weekday,
     };
 
     static const std::vector<std::string> FLOAT_FIELDS;
