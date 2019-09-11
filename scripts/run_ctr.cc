@@ -45,7 +45,7 @@ int main(int argc, char const * const * argv)
 {
     auto timer = Timer();
     double prob = 0.0;
-    if (argc < 24) { // What is count including features + args. 
+    if (argc < 18) { // What is count including features + args. 
         return 0;
     } else {
         std::string modelpath = std::string(argv[1]);
