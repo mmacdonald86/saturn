@@ -9,7 +9,7 @@ TARGETS = libsaturn.so latency run_ctr run_saturn test_svr run_winrate
 
 all: $(TARGETS)
 
-libsaturn.so: src/feature_engine.cc src/ctr_model.cc src/svr_model.cc src/utils.cc
+libsaturn.so: src/feature_engine.cc src/ctr_model.cc src/svr_model.cc src/utils.cc src/wr_model.cc
 	$(CC) -std=c++17 $(CCFLAGS) -Iinclude -fPIC -shared $^ $(LIBS) -o $@
 
 latency: tests/latency.cc
