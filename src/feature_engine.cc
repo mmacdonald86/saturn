@@ -39,6 +39,17 @@ const std::vector<std::string> FeatureEngine::STRING_FIELDS({
     "ctr_hour",
     "ctr_sic",
     "ctr_dt",
+    "wr_uid_type",
+    "wr_device_type",
+    "wr_os",
+    "wr_device_make",
+    "wr_bundle",
+    "wr_banner_size",
+    "wr_sp_user_gender",
+    "wr_pub_bid_rates",
+    "wr_isp",
+    "wr_adomain",
+    "wr_device_model",
 });
 
 
@@ -48,6 +59,9 @@ const std::vector<std::string> FeatureEngine::INT_FIELDS({
     "sl_adjusted_confidence",
     "device_year",
     "ctr_sl_adjusted_confidence",
+    "wr_hour",
+    "wr_sl_adjusted_confidence",
+    "wr_weekday"
 });
 
 

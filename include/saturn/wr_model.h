@@ -41,12 +41,17 @@ class WrModel
 
     // The following methods provide results after a call to `run`.
     std::string const & message() const;
-    double prob() const;
+    double win_prob() const;
+    double dev_prob() const;
+    double final_prob() const;
 
   private:
     FeatureEngine & _feature_engine;
     void * _mars_model = nullptr;
-    double _prob = 0.;
+    void * _deliver_model = nullptr;
+    double _win_prob = 0.;
+    double _dev_prob = 0.;
+    double _final_prob = 0.;
 
     std::string _path;
     std::string _model_id;
