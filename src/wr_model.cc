@@ -88,7 +88,7 @@ double WrModel::get_prob(std::vector<std::string> input)
     auto f = static_cast<mars::FeatureEngine *>(_feature_engine._mars_feature_engine);
     auto x = f->render(_composer_id);
 
-    std::cout << "  feature: " << std::endl;
+//    std::cout << "  feature: " << std::endl;
 //    for (auto i = x.begin(); i != x.end(); ++i){
 //        std::cout << *i << ' ';
 //    }
@@ -114,9 +114,9 @@ double WrModel::get_prob(std::vector<std::string> input)
 //    auto zz = std::any_cast<mars::ChainModel::result_type>(z);
     double prob = std::any_cast<double>(std::get<0>(z));
     double dev_prob = std::any_cast<double>(std::get<0>(z1));
-    std::cout << "  win rate prediction: " << prob << std::endl;
-    std::cout << "  delivery rate prediction: " << dev_prob << std::endl;
-    std::cout << "  final prediction: " << prob * dev_prob << std::endl;
+//    std::cout << "  win rate prediction: " << prob << std::endl;
+//    std::cout << "  delivery rate prediction: " << dev_prob << std::endl;
+//    std::cout << "  final prediction: " << prob * dev_prob << std::endl;
     _win_prob = prob;
     _dev_prob = dev_prob;
     _final_prob = prob * dev_prob;
