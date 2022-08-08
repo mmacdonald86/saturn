@@ -90,6 +90,18 @@ double ctrModel::get_prob(std::vector<std::string> input)
     return 0;
 }
 
+double ctrModel::get_prob()
+{
+    auto f = static_cast<mars::FeatureEngine *>(_feature_engine._mars_feature_engine);
+    auto x = f->render(_composer_id);
+    auto m = static_cast<mars::ChainModel *>(_mars_model);
+
+    auto z = m->predict_one(x);
+    
+    _prob = std::any_cast<double>(std::get<0>(z));
+    return _prob;
+}
+
 
 std::string const & ctrModel::message() const
 {

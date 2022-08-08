@@ -67,6 +67,7 @@ class FeatureEngine
         ctr_hour,
         ctr_sic,
         ctr_dt,
+        ctr_bundle,
         wr_Uidtype,
         wr_Devicetype,
         wr_Os,

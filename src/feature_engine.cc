@@ -39,6 +39,7 @@ const std::vector<std::string> FeatureEngine::STRING_FIELDS({
     "ctr_hour",
     "ctr_sic",
     "ctr_dt",
+    "ctr_bundle",
     "wr_uid_type",
     "wr_device_type",
     "wr_os",

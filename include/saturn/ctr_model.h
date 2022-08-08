@@ -21,6 +21,13 @@ class ctrModel
 
     double get_prob(std::vector<std::string> input);
 
+    // Get output probability after setting features directly
+    double get_prob();
+
+    FeatureEngine& get_features() {
+      return _feature_engine;
+    }
+
     // 0 is success; usually no need to check `message()`.
     // Other values indicate problems; check `message()`.
     //
