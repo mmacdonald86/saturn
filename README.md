@@ -28,3 +28,9 @@ Later we'll make this process more streamlined.
    2. For each model that needs to be run, call its `run` method, providing additional arguments, and collecting its results. Note that these models may change the state of the `FeatureEngine` instance by, for example, updating some fields.
    3. For Placed/Auto Optimization adgroups, call its `get_multiplier` method for the multipliers.
    4. For Cold Start and Inflight PSVR Calibration, call its `get_cpsvr` method for the calibrated psvr.
+
+## Packaging
+
+Packaging for neptun-saturn.rpm is done in Neptune.  Put saturn and mars source at same level as
+neptune source folder, then in neptune/nise/saturn 
+run `make && make rpm`

@@ -1,3 +1,8 @@
+Release 0.5.8
+-------------
+- Support ctr_bundle_name in ctr_model
+- Add key/value API for setting values in feature_engine to make support of new models easier
+
 Release 0.5.7
 -------------
 - Support hard quantile cutoff in SvrModel.
