@@ -1,3 +1,7 @@
+Release 0.5.9
+-------------
+- [NEPTUNE-1405] Support ctr_tenant_id and ctr_business_type in ctr model
+
 Release 0.5.8
 -------------
 - Support ctr_bundle_name in ctr_model

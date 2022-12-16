@@ -40,6 +40,8 @@ const std::vector<std::string> FeatureEngine::STRING_FIELDS({
     "ctr_sic",
     "ctr_dt",
     "ctr_bundle",
+    "ctr_tenant_id",
+    "ctr_business_type",
     "wr_uid_type",
     "wr_device_type",
     "wr_os",
@@ -60,6 +62,7 @@ const std::vector<std::string> FeatureEngine::INT_FIELDS({
     "sl_adjusted_confidence",
     "device_year",
     "ctr_sl_adjusted_confidence",
+    "ctr_is_ctr_optimized",
     "wr_hour",
     "wr_sl_adjusted_confidence",
     "wr_weekday"
