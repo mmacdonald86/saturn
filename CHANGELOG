@@ -1,3 +1,7 @@
+Release 3.0.0
+-------------
+- [AT-4954] Update version so broken 2.0.0 version no longer highest numbered
+
 Release 0.5.9
 -------------
 - [NEPTUNE-1405] Support ctr_tenant_id and ctr_business_type in ctr model
